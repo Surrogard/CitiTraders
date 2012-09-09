@@ -27,6 +27,21 @@ permissions:
       traders.command.fire: true
       traders.command.cancel: true
       traders.command.reloadprofiles: true
+      traders.command.setwallet: true
+      traders.command.wallet: true
+      traders.command.linkchest: true
+      traders.command.unlinkchest: true
+      traders.command.link: true
+      traders.command.unlink: true
+  traders.wallet.*:
+    description: Grants access to all wallet commands
+    default: op
+    children:
+      traders.wallet.admin: true
+      traders.wallet.private: true
+      traders.wallet.owner: true
+      traders.wallet.town_bank: true
+      traders.wallet.bank: true
   traders.command.cancel:
     description: Can use cancel command
     default: true
@@ -48,6 +63,18 @@ permissions:
   traders.command.wallet:
     description: Give/take from an npc wallet.
     default: op
+  traders.command.link:
+    description: Link two NPCs price lists
+    default: op
+  traders.command.unlink:
+    description: Unlink to NPCs price lists
+    default: op
+  traders.command.linkchest:
+    description: Link a chest to an NPC
+    default: true
+  traders.command.unlinkchest:
+    description: Unlink a chest from an NPC
+    default: true
   traders.wallet.private:
     description: Allows user to set traders to use their own private wallet.
     default: true
@@ -56,7 +83,10 @@ permissions:
     default: true  
   traders.wallet.bank:
     description: Allows user to set traders to use a bank account (ECONOMY PLUGIN MUST SUPPORT BANKS, USER MUST OWN BANK ACCOUNT).
-    default: true 
+    default: true
+  traders.wallet.town_bank:
+    description: Allows user to set the traders to use a town bank (TOWNY PLUGIN MUST BE INSTALLED)
+    default: true
   traders.wallet.admin:
     description: Allows user to set traders to use a bank account (ECONOMY PLUGIN MUST SUPPORT BANKS, USER MUST OWN BANK ACCOUNT).
     default: op
