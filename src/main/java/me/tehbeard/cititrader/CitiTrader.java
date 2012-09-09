@@ -27,6 +27,7 @@ import net.citizensnpcs.api.trait.trait.Owner;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -348,6 +349,18 @@ public class CitiTrader extends JavaPlugin {
                 status.setStatus(Status.REMOVE_LINK);
                 return true;
             }
+            case linkchest: {
+                TraderStatus status = Trader.getStatus(player.getName());
+                player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Chest you want to link.");
+                status.setStatus(Status.SELECT_LINK_CHEST);
+                return true;
+            }
+            case unlinkchest: {
+                TraderStatus status = Trader.getStatus(player.getName());
+                player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Chest you want to unlink.");
+                status.setStatus(Status.SELECT_UNLINK_CHEST);
+                return true;
+            }
         }
 
 
@@ -379,7 +392,9 @@ public class CitiTrader extends JavaPlugin {
         disable,
         enable,
         link,
-        removelink;
+        removelink,
+        linkchest,
+        unlinkchest;
     }
 
     private enum Style {
@@ -414,6 +429,35 @@ public class CitiTrader extends JavaPlugin {
         }
 
         return limit;
+    }
+
+    public int getChestLimit(Player player) {
+        int limit = getProfiles().getInt("profiles.default.chest-limit", 1);
+        for (String s : getProfiles().getConfigurationSection("profiles").getKeys(false)) {
+            if (s.equals("default")) {
+                continue;
+            }
+            if (player.hasPermission(PERM_PREFIX + ".profile." + s)) {
+                limit = Math.max(getProfiles().getInt("profiles." + s + ".chest-limit"), limit);
+            }
+
+        }
+
+        return limit;
+    }
+
+    public NPC isChestLinked(Location loc) {
+        for (NPC npc : citizens.getNPCRegistry()) {
+            if (npc.hasTrait(StockRoomTrait.class)) {
+                if (npc.getTrait(StockRoomTrait.class).hasLinkedChest()) {
+                    if (npc.getTrait(StockRoomTrait.class).linkedChests.containsKey(loc)) {
+                        return npc;
+                    }
+                }
+            }
+        }
+        
+        return null;
     }
 
     public void getManifest() throws IOException {

@@ -2,6 +2,7 @@ package me.tehbeard.cititrader;
 
 import me.tehbeard.cititrader.WalletTrait.WalletType;
 import net.citizensnpcs.api.npc.NPC;
+import org.bukkit.Location;
 import org.bukkit.inventory.Inventory;
 
 public class TraderStatus {
@@ -21,9 +22,11 @@ public class TraderStatus {
         DISABLE,
         ENABLE,
         SET_LINK,
-        REMOVE_LINK
-        
-        
+        REMOVE_LINK,
+        SELECT_LINK_CHEST,
+        SELECT_UNLINK_CHEST,
+        SELECT_CHEST_NPC,
+        SELECT_UNCHEST_NPC
     }
     private NPC trader;
     private Status status = Status.NOT;
@@ -34,7 +37,8 @@ public class TraderStatus {
     private String accName;
     private int linkedNPCID;
     private String linkedNPCName;
-    
+    private Location chestLocation;
+    private String chestCatagory;
     
     public String getAccName() {
         return accName;
@@ -102,5 +106,13 @@ public class TraderStatus {
     
     public String getLinkedNPCName() {
         return linkedNPCName;
+    }
+    
+    public Location getChestLocation() {
+        return chestLocation;
+    }
+    
+    public void setChestLocation(Location value) {
+        chestLocation = value;
     }
 }

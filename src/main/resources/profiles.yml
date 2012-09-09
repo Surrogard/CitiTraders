@@ -1,9 +1,13 @@
 profiles:
   default:
     trader-limit: 1
+    chest-limit: 0
   shopkeep:
     trader-limit: 5
+    chest-limit: 2
   businessman:
     trader-limit: 10
+    chest-limit: 5
   ceo:
     trader-limit: 20
+    chest-limit: 10

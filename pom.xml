@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.tehbeard</groupId>
     <artifactId>CitiTrader</artifactId>
-    <version>RC-4</version>
+    <version>RC-5</version>
     <name>CitiTrader</name>
     <description>Trader for citizens</description>
 

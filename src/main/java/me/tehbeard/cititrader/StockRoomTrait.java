@@ -16,7 +16,10 @@ import net.citizensnpcs.api.util.ItemStorage;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Chest;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -30,13 +33,13 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
     private Inventory stock;
     Map<ItemStack, Double> sellPrices;
     Map<ItemStack, Double> buyPrices;
+    Map<Location, String> linkedChests;
     boolean enableLeftClick;
     boolean enableRightClick;
     boolean disabled;
     int linkedNPCID;
 
     public StockRoomTrait() {
-
         this(54);
     }
 
@@ -46,9 +49,10 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             throw new IllegalArgumentException("Size must be between 1 and 54");
         }
 
-        stock = Bukkit.createInventory(this, size, "stockroom");
+        stock = Bukkit.createInventory(this, size, "Stockroom");
         sellPrices = new HashMap<ItemStack, Double>();
         buyPrices = new HashMap<ItemStack, Double>();
+        linkedChests = new HashMap<Location, String>();
         enableLeftClick = true;
         enableRightClick = true;
         disabled = false;
@@ -93,6 +97,18 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         //load if Trader is linked to another NPC
         linkedNPCID = data.getInt("linkedNPCID", -1);
 
+        //load the linked Chests
+        for (DataKey chestKey : data.getRelative("chests").getIntegerSubKeys()) {
+            int x = chestKey.getRelative("location").getInt("X");
+            int y = chestKey.getRelative("location").getInt("Y");
+            int z = chestKey.getRelative("location").getInt("Z");
+            World world = CitiTrader.self.getServer().getWorld(chestKey.getRelative("location").getString("world"));
+            String catagory = chestKey.getString("catagory");
+
+            Location loc = new Location(world, x, y, z);
+
+            linkedChests.put(loc, catagory);
+        }
     }
 
     @Override
@@ -115,7 +131,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
         data.removeKey("prices");
         DataKey sellPriceIndex = data.getRelative("prices");
- 
+
         i = 0;
         for (Entry<ItemStack, Double> price : sellPrices.entrySet()) {
             if (price.getValue() > 0.0D) {
@@ -134,6 +150,23 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                 buyPriceIndex.getRelative("" + i++).setDouble("price", price.getValue());
             }
         }
+
+        //Save Linked chests
+        data.removeKey("chests");
+        DataKey chestsKey = data.getRelative("chests");
+        i = 0;
+        for (Entry<Location, String> chest : linkedChests.entrySet()) {
+            Material type = chest.getKey().getBlock().getType();
+            if (type.equals(Material.CHEST) || type.equals(Material.ENDER_CHEST)) {
+                DataKey chestdata = chestsKey.getRelative("" + i).getRelative("location");
+                chestdata.setInt("X", chest.getKey().getBlockX());
+                chestdata.setInt("Y", chest.getKey().getBlockY());
+                chestdata.setInt("Z", chest.getKey().getBlockZ());
+                chestdata.setString("world", chest.getKey().getWorld().getName());
+                chestsKey.getRelative("" + i).setString("catagory", chest.getValue());
+                i++;
+            }
+        }
     }
 
     public Inventory getInventory() {
@@ -150,17 +183,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
         Inventory display = Bukkit.createInventory(null, 54, "Left Click Buy-Right Click Price");
 
-        for (ItemStack is : stock) {
-            if (is == null) {
-                continue;
-            }
-            ItemStack chk = new ItemStack(is.getType(), 1, is.getDurability());
-            chk.addEnchantments(is.getEnchantments());
-            if (display.contains(chk) == false && getSellPrice(is) > 0.0D) {
-                display.addItem(chk);
-            }
-
-        }
+        buildSalesWindow(display);
 
         return display;
     }
@@ -188,10 +211,31 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
         int amountFound = 0;
 
-        for (Entry<Integer, ? extends ItemStack> e : stock.all(material).entrySet()) {
-            is.setAmount(e.getValue().getAmount());
-            if (e.getValue().equals(is)) {
-                amountFound += e.getValue().getAmount();
+        if (hasLinkedChest()) {
+            for (Entry<Location, String> loc : linkedChests.entrySet()) {
+                if (loc.getKey().getBlock().getType().equals(Material.CHEST)) {
+                    if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
+                        for (Entry<Integer, ? extends ItemStack> e : ((Chest) loc.getKey().getBlock().getState()).getBlockInventory().all(material).entrySet()) {
+                            //for (ItemStack isfor : ((Chest) loc.getKey().getBlock().getState()).getBlockInventory()) {
+                            is.setAmount(e.getValue().getAmount());
+                            if (e.getValue().equals(is)) {
+                                amountFound += e.getValue().getAmount();
+                            }
+                        }
+                    } else {
+                        // warn own that chest is to far away.
+                    }
+                } else {
+                    // warn if owner is online, chest doesn't exist.
+                    System.out.println("Chest doesn't exist: " + loc.getKey().getBlock().getType().toString());
+                }
+            }
+        } else {
+            for (Entry<Integer, ? extends ItemStack> e : stock.all(material).entrySet()) {
+                is.setAmount(e.getValue().getAmount());
+                if (e.getValue().equals(is)) {
+                    amountFound += e.getValue().getAmount();
+                }
             }
         }
         return checkAmount ? amount <= amountFound : amountFound > 0;
@@ -203,7 +247,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             NPC linkedNPC = it.next();
             if (linkedNPC.getName().equals(name)) {
                 if (linkedNPC.hasTrait(StockRoomTrait.class)) {
-                    if(linkedNPC.getTrait(StockRoomTrait.class).getLinkedNPC().getId() == npc.getId()) {
+                    if (linkedNPC.getTrait(StockRoomTrait.class).getLinkedNPC().getId() == npc.getId()) {
                         return false;
                     } else {
                         linkedNPCID = linkedNPC.getId();
@@ -212,10 +256,10 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     public boolean removeLinkedNPC() {
         linkedNPCID = -1;
         return true;
@@ -231,12 +275,41 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
     public NPC getLinkedNPC() {
         NPC linkedNPC = CitizensAPI.getNPCRegistry().getById(linkedNPCID);
-        if(linkedNPC != null) {
+        if (linkedNPC != null) {
             if (linkedNPC.hasTrait(StockRoomTrait.class)) {
                 return linkedNPC;
             }
         }
         return null;
+    }
+
+    public boolean setLinkedChest(Location loc, String catagory) {
+        if (loc.getBlock().getType().equals(Material.CHEST)) {
+            linkedChests.put(loc, catagory);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean removeLinkedChest(Location loc) {
+        if (linkedChests.containsKey(loc)) {
+            linkedChests.remove(loc);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean setLinkedChest(Location loc) {
+        return setLinkedChest(loc, "default");
+    }
+
+    public boolean hasLinkedChest() {
+        if (linkedChests.size() > 0) {
+            return true;
+        }
+        return false;
     }
 
     public void setDisabled(boolean value) {
@@ -250,16 +323,16 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
     public double getSellPrice(ItemStack is) {
         ItemStack i = is.clone();
         i.setAmount(1);
-        if(isLinkedNPC()) {
+        if (isLinkedNPC()) {
             NPC linkedNPC = getLinkedNPC();
-            if(linkedNPC != null) {
+            if (linkedNPC != null) {
                 return linkedNPC.getTrait(StockRoomTrait.class).getSellPrices().containsKey(i) ? linkedNPC.getTrait(StockRoomTrait.class).getSellPrices().get(i) : 0;
             }
         }
         return sellPrices.containsKey(i) ? sellPrices.get(i) : 0;
 
     }
-    
+
     public Map<ItemStack, Double> getSellPrices() {
         return sellPrices;
     }
@@ -267,15 +340,15 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
     public void setSellPrice(ItemStack is, double price) {
         ItemStack i = is.clone();
         i.setAmount(1);
-        if(price == -1) {
-            if(sellPrices.containsKey(i)) {
+        if (price == -1) {
+            if (sellPrices.containsKey(i)) {
                 sellPrices.remove(i);
             } else {
                 System.out.println("Item not found!");
             }
             return;
         }
-        
+
         sellPrices.put(i, price);
 
     }
@@ -283,14 +356,14 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
     public double getBuyPrice(ItemStack is) {
         ItemStack i = is.clone();
         i.setAmount(1);
-        if(isLinkedNPC()) {
+        if (isLinkedNPC()) {
             NPC linkedNPC = CitizensAPI.getNPCRegistry().getById(linkedNPCID);
             return linkedNPC.getTrait(StockRoomTrait.class).getBuyPrices().containsKey(i) ? linkedNPC.getTrait(StockRoomTrait.class).getBuyPrices().get(i) : 0;
         }
         return buyPrices.containsKey(i) ? buyPrices.get(i) : 0;
 
     }
-    
+
     public Map<ItemStack, Double> getBuyPrices() {
         return buyPrices;
     }
@@ -298,8 +371,8 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
     public void setBuyPrice(ItemStack is, double price) {
         ItemStack i = is.clone();
         i.setAmount(1);
-        if(price == -1) {
-            if(buyPrices.containsKey(i)) {
+        if (price == -1) {
+            if (buyPrices.containsKey(i)) {
                 buyPrices.remove(i);
             }
             return;
@@ -321,12 +394,13 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
         if (state.getStatus() == Status.ITEM_SELECT || state.getStatus() == Status.AMOUNT_SELECT) {
             state.setStatus(Status.ITEM_SELECT);
-            buildSalesWindow(state);
+            buildSalesWindow(state.getInventory());
         } else {
             state.setTrader(npc);
             state.setStatus(Status.ITEM_SELECT);
             state.setInventory(constructViewing());
             player.openInventory(state.getInventory());
+            //buildSalesWindow(state);
         }
     }
 
@@ -452,7 +526,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         //TODO: If admin shop, do not deduct items.
         StockRoomTrait store = npc.getTrait(StockRoomTrait.class);
         TraderStatus state = Trader.getStatus(player.getName());
-
+        Material material = isold.getType();
         ItemStack is = isold.clone();
 
         if (store.hasStock(is, true)) {
@@ -482,7 +556,47 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                         //if(CitiTrader.economy.depositPlayer(storeOwner,cost).type==ResponseType.SUCCESS){
                         if (wallet.deposit(cost)) {
                             if (npc.getTrait(WalletTrait.class).getType() != WalletType.ADMIN) {
-                                store.getInventory().removeItem(isold);
+
+                                if (hasLinkedChest()) {
+                                    Integer amount = isold.getAmount();
+                                    double refund = 0;
+                                    for (Entry<Location, String> loc : linkedChests.entrySet()) {
+                                        //if (loc.getKey().getBlock().getType().equals(Material.CHEST)) {
+                                        if (locationIsBlock(loc.getKey(), Material.CHEST)) {
+                                            //if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
+                                            if (!chestToFar(loc.getKey(), player)) {
+                                                Inventory blockInv = ((Chest) loc.getKey().getBlock().getState()).getBlockInventory();
+                                                for (Entry<Integer, ? extends ItemStack> e : blockInv.all(material).entrySet()) {
+                                                    //for (ItemStack isfor : ((Chest) loc.getKey().getBlock().getState()).getBlockInventory()) {
+                                                    is.setAmount(e.getValue().getAmount());
+                                                    if (e.getValue().equals(is)) {
+                                                        System.out.println("item found");
+                                                        if (e.getValue().getAmount() > amount) {
+                                                            System.out.println("removing " + isold.toString());
+                                                            blockInv.removeItem(isold);
+                                                            //isold.setAmount(0);
+                                                            amount = 0;
+                                                        } else {
+                                                            System.out.println("removing " + e.toString());
+                                                            blockInv.removeItem(e.getValue());
+                                                            //isold.setAmount(isold.getAmount() - e.getValue().getAmount());
+                                                            amount -= e.getValue().getAmount();
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        refund = amount * store.getSellPrice(is);
+
+                                    }
+                                    if (refund > 0) {
+                                        CitiTrader.economy.depositPlayer(playerName, cost);
+                                        player.sendRawMessage("Refund : " + cost);
+                                    }
+                                } else {
+                                    store.getInventory().removeItem(isold);
+                                }
                             }
 
 
@@ -520,6 +634,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             Double total = 0.0D;
             for (int i = 0; i < sellbox.getSize(); i++) {
                 ItemStack is = sellbox.getItem(i);
+
                 if (is == null) {
                     continue;
                 }
@@ -532,16 +647,38 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                 }
 
 
-
-
+// start chest loop here
+                Inventory targetInv = null;
                 //check space
-                Inventory chkr = Bukkit.createInventory(null, 9 * 6);
-                chkr.setContents(state.getTrader().getTrait(StockRoomTrait.class).getInventory().getContents());
-                if (chkr.addItem(is).size() > 0) {
-                    ((CommandSender) event.getPlayer()).sendMessage(ChatColor.RED + "Trader does not have enough space to hold something you sold him.");
-                    continue;
+                if (state.getTrader().getTrait(StockRoomTrait.class).hasLinkedChest()) {
+                    for (Entry<Location, String> loc : state.getTrader().getTrait(StockRoomTrait.class).linkedChests.entrySet()) {
+                        if (locationIsBlock(loc.getKey(), Material.CHEST)) {
+                            //if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
+                            if (!chestToFar(loc.getKey(), ((Player)event.getPlayer()))) {
+                                Inventory blockInv = ((Chest) loc.getKey().getBlock().getState()).getBlockInventory();
+                                
+                                if(checkSpace(blockInv, is.clone())) {
+                                    targetInv = blockInv;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    //Inventory chkr = Bukkit.createInventory(null, 9 * 6);
+
+                    //chkr.setContents(state.getTrader().getTrait(StockRoomTrait.class).getInventory().getContents().clone());
+                    if (!checkSpace(state.getTrader().getTrait(StockRoomTrait.class).getInventory(), is)) {
+                        ((CommandSender) event.getPlayer()).sendMessage(ChatColor.RED + "Trader does not have enough space to hold something you sold him.");
+                    } else {
+                        targetInv = state.getTrader().getTrait(StockRoomTrait.class).getInventory();
+                    }
                 }
 
+                if(targetInv == null) {
+                    continue;
+                }
+                
                 WalletTrait wallet = state.getTrader().getTrait(WalletTrait.class);
                 //check we have the cash
                 double sale = price * is.getAmount();
@@ -565,7 +702,9 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                 //take item
                 sellbox.setItem(i, null);
                 if (state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.ADMIN) {
-                    state.getTrader().getTrait(StockRoomTrait.class).getInventory().addItem(is);
+                    //state.getTrader().getTrait(StockRoomTrait.class).getInventory().addItem(is);
+                    targetInv.addItem(is);
+                    System.out.println("Adding item " + is.toString());
                 }
 
 
@@ -587,6 +726,40 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         Trader.clearStatus(event.getPlayer().getName());
 
 
+    }
+
+    public boolean chestToFar(Location loc, Player player) {
+        if (loc.distance(npc.getBukkitEntity().getLocation()) < 10) {
+            return false;
+        }
+        System.out.println("Chest too far away.");
+        return true;
+    }
+
+    public boolean locationIsBlock(Location loc, Material mat) {
+        if (loc.getBlock().getType().equals(mat)) {
+            return true;
+        }
+        System.out.println("Location is not a chest.");
+        return false;
+    }
+
+    public boolean checkSpace(Inventory inv, ItemStack item) {
+        Inventory chkr = Bukkit.createInventory(null, inv.getSize());
+        //chkr.setContents(inv.getContents().clone());
+        ItemStack chkitem = null;
+        for(ItemStack is : inv.getContents()) {
+            if(is != null) {
+                chkitem = is.clone();
+                chkr.addItem(chkitem);
+            }
+        }
+        
+        if (chkr.addItem(item).size() > 0) {
+            return false;
+        }
+
+        return true;
     }
 
     public boolean isStockRoomEmpty() {
@@ -615,45 +788,96 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
         this.enableRightClick = enableRightClick;
     }
 
-    public void buildSellWindow(ItemStack item, TraderStatus state) {
-        ItemStack is = item.clone();
-        //clear the inventory
-        for (int i = 0; i < 54; i++) {
-            state.getInventory().setItem(i, null);
-        }
-
-        //set up the amount selection
-        int k = 0;
-        for (int i = 1; i <= 64; i *= 2) {
-            if (i <= is.getMaxStackSize()) {
-                ItemStack newIs = is.clone();
-                newIs.setAmount(i);
-                if (hasStock(newIs, true)) {
-                    state.getInventory().setItem(k, newIs);
+    public void buildSellWindow(final ItemStack item, final TraderStatus state) {
+        CitiTrader.self.getServer().getScheduler().scheduleAsyncDelayedTask(CitiTrader.self, new Runnable() {
+            @Override
+            public void run() {
+                ItemStack is = item.clone();
+                //clear the inventory
+                for (int i = 0; i < 54; i++) {
+                    state.getInventory().setItem(i, null);
                 }
-                k++;
+                if (hasLinkedChest()) {
+                    //set up the amount selection
+                    int k = 0;
+                    for (int i = 1; i <= 64; i *= 2) {
+                        if (i <= is.getMaxStackSize()) {
+                            ItemStack newIs = is.clone();
+                            newIs.setAmount(i);
+                            if (hasStock(newIs, true)) {
+                                state.getInventory().setItem(k, newIs);
+                            }
+                            k++;
+                        }
+                    }
+                }
+
+                //set up the amount selection
+                int k = 0;
+                for (int i = 1; i <= 64; i *= 2) {
+                    if (i <= is.getMaxStackSize()) {
+                        ItemStack newIs = is.clone();
+                        newIs.setAmount(i);
+                        if (hasStock(newIs, true)) {
+                            state.getInventory().setItem(k, newIs);
+                        }
+                        k++;
+                    }
+                }
+                state.getInventory().setItem(45, new ItemStack(Material.ARROW, 1));
+                state.setStatus(Status.AMOUNT_SELECT);
             }
-        }
-        state.getInventory().setItem(45, new ItemStack(Material.ARROW, 1));
-        state.setStatus(Status.AMOUNT_SELECT);
+        });
+
         //System.out.println("ITEM SELECTED");
     }
 
-    public void buildSalesWindow(TraderStatus state) {
-        //clear the inventory
-        for (int i = 0; i < 54; i++) {
-            state.getInventory().setItem(i, null);
-        }
+    public void buildSalesWindow(final Inventory inv) {
 
-        for (ItemStack is : stock) {
-            if (is == null) {
-                continue;
+
+        System.out.println("Trader has Linked Chest: " + hasLinkedChest());
+        CitiTrader.self.getServer().getScheduler().scheduleAsyncDelayedTask(CitiTrader.self, new Runnable() {
+            @Override
+            public void run() {
+                //clear the inventory
+                for (int i = 0; i < 54; i++) {
+                    inv.setItem(i, null);
+                }
+                if (hasLinkedChest()) {
+                    for (Entry<Location, String> loc : linkedChests.entrySet()) {
+                        if (loc.getKey().getBlock().getType().equals(Material.CHEST)) {
+                            if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
+                                for (ItemStack is : ((Chest) loc.getKey().getBlock().getState()).getBlockInventory()) {
+                                    if (is == null) {
+                                        continue;
+                                    }
+                                    ItemStack chk = new ItemStack(is.getType(), 1, is.getDurability());
+                                    chk.addEnchantments(is.getEnchantments());
+                                    if (inv.contains(chk) == false && getSellPrice(is) > 0.0D) {
+                                        inv.addItem(chk);
+                                    }
+                                }
+                            } else {
+                                // warn own that chest is to far away.
+                            }
+                        } else {
+                            // warn if owner is online, chest doesn't exist.
+                            System.out.println("Chest doesn't exist: " + loc.getKey().getBlock().getType().toString());
+                        }
+                    }
+                } else {
+                    for (ItemStack is : stock) {
+                        if (is == null) {
+                            continue;
+                        }
+                        ItemStack chk = new ItemStack(is.getType(), 1, is.getDurability());
+                        chk.addEnchantments(is.getEnchantments());
+                        if (inv.contains(chk) == false && getSellPrice(is) > 0.0D) {
+                            inv.addItem(chk);
+                        }
+                    }
+                }
             }
-            ItemStack chk = new ItemStack(is.getType(), 1, is.getDurability());
-            chk.addEnchantments(is.getEnchantments());
-            if (state.getInventory().contains(chk) == false && getSellPrice(is) > 0.0D) {
-                state.getInventory().addItem(chk);
-            }
-        }
+        });
     }
 }

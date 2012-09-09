@@ -18,9 +18,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.mcstats.Metrics;
 import org.mcstats.Metrics.Graph;
 
@@ -57,21 +59,21 @@ public class Trader implements Listener {
             graph.addPlotter(new Metrics.Plotter("Total Traders") {
                 @Override
                 public int getValue() {
-                    
+
                     Integer totaltrader = 0;
                     try {
                         Iterator it = CitizensAPI.getNPCRegistry().iterator();
-                    while (it.hasNext()) {
-                        NPC npcount = (NPC) it.next();
-                        if (npcount.hasTrait(StockRoomTrait.class)) {
-                            totaltrader++;
+                        while (it.hasNext()) {
+                            NPC npcount = (NPC) it.next();
+                            if (npcount.hasTrait(StockRoomTrait.class)) {
+                                totaltrader++;
+                            }
                         }
-                    }
                     } catch (Exception e) {
                         System.out.println("error");
                         e.printStackTrace();
                     }
-                    if(CitiTrader.self.getConfig().getBoolean("debug.tradercount", false)) {
+                    if (CitiTrader.self.getConfig().getBoolean("debug.tradercount", false)) {
                         CitiTrader.self.getLogger().info("Traders: " + totaltrader);
                     }
                     return totaltrader;
@@ -83,8 +85,8 @@ public class Trader implements Listener {
             CitiTrader.self.getLogger().info("Failed:");
             e.printStackTrace();
         }
-        
-        if(CitiTrader.self.getConfig().getBoolean("debug.versioncheck", true)) {
+
+        if (CitiTrader.self.getConfig().getBoolean("debug.versioncheck", true)) {
             CitiTrader.self.checkVersion();
         }
     }
@@ -103,6 +105,35 @@ public class Trader implements Listener {
             by.sendMessage(ChatColor.DARK_PURPLE + "This trader is currently disabled.");
         }
 
+    }
+
+    @EventHandler
+    public void onRightClick(PlayerInteractEvent event) {
+        if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            return;
+        }
+
+        if (!event.getClickedBlock().getType().equals(Material.CHEST)) {
+            return;
+        }
+
+        Player by = event.getPlayer();
+
+        TraderStatus state = getStatus(by.getName());
+
+        if (state.getStatus().equals(Status.SELECT_LINK_CHEST)) {
+            event.setCancelled(true);
+            state.setChestLocation(event.getClickedBlock().getLocation());
+            state.setStatus(Status.SELECT_CHEST_NPC);
+            by.sendMessage(ChatColor.DARK_PURPLE + "Right click the NPC you want to link.");
+        }
+
+        if (state.getStatus().equals(Status.SELECT_UNLINK_CHEST)) {
+            event.setCancelled(true);
+            state.setChestLocation(event.getClickedBlock().getLocation());
+            state.setStatus(Status.SELECT_UNCHEST_NPC);
+            by.sendMessage(ChatColor.DARK_PURPLE + "Right click the NPC you want to unlink.");
+        }
     }
 
     @EventHandler
@@ -157,7 +188,7 @@ public class Trader implements Listener {
                 case SET_PRICE_SELL: {
                     state.getTrader().getTrait(StockRoomTrait.class).setSellPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
-                    if(state.getMoney() == -1) {
+                    if (state.getMoney() == -1) {
                         by.sendMessage(ChatColor.GREEN + "Item price removed.");
                     } else {
                         by.sendMessage(ChatColor.GREEN + "Sell price set.");
@@ -168,7 +199,7 @@ public class Trader implements Listener {
                 case SET_PRICE_BUY: {
                     state.getTrader().getTrait(StockRoomTrait.class).setBuyPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
-                    if(state.getMoney() == -1) {
+                    if (state.getMoney() == -1) {
                         by.sendMessage(ChatColor.GREEN + "Item price removed.");
                     } else {
                         by.sendMessage(ChatColor.GREEN + "Buy price set.");
@@ -231,18 +262,18 @@ public class Trader implements Listener {
                     return;
                 }
                 case SET_LINK: {
-                    if(!state.getTrader().getTrait(StockRoomTrait.class).setLinkedNPC(state.getLinkedNPCName())) {
+                    if (!state.getTrader().getTrait(StockRoomTrait.class).setLinkedNPC(state.getLinkedNPCName())) {
                         by.sendMessage("Trader could not be linked to " + state.getLinkedNPCName());
                         state.setStatus(Status.NOT);
                         return;
                     }
-                    
+
                     by.sendMessage("Trader linked to " + state.getLinkedNPCName());
                     state.setStatus(Status.NOT);
                     return;
                 }
-                case REMOVE_LINK:
-                    if(!state.getTrader().getTrait(StockRoomTrait.class).removeLinkedNPC()) {
+                case REMOVE_LINK: {
+                    if (!state.getTrader().getTrait(StockRoomTrait.class).removeLinkedNPC()) {
                         by.sendMessage("Trader could not be unlinked.");
                         state.setStatus(Status.NOT);
                         return;
@@ -250,14 +281,64 @@ public class Trader implements Listener {
                     by.sendMessage("Trader has been unlinked, he will use is own pricelist now.");
                     state.setStatus(Status.NOT);
                     return;
+                }
+                case SELECT_CHEST_NPC: {
+                    NPC chestOwner = CitiTrader.self.isChestLinked(state.getChestLocation());
+                    if (chestOwner != null) {
+                        if(!chestOwner.getTrait(Owner.class).isOwnedBy(by)) {
+                            by.sendMessage(ChatColor.RED + "Chest is already linked to a different Owner.");
+                            state.setStatus(Status.NOT);
+                            return;
+                        }
+                    }
+                    if (!state.getTrader().getTrait(StockRoomTrait.class).setLinkedChest(state.getChestLocation())) {
+                        by.sendMessage(ChatColor.RED + "Chest could not be linked to Trader.");
+                        state.setStatus(Status.NOT);
+                        return;
+                    }
+
+                    int chestLimit = CitiTrader.self.getChestLimit(by);
+                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(StockRoomTrait.class).linkedChests.size()) {
+                        by.sendMessage(ChatColor.RED + "You cannot Link another Chest to this NPC.");
+                        state.setStatus(Status.NOT);
+                        return;
+                    }
+
+                    by.sendMessage(ChatColor.GREEN + "Chest has been linked to " + npc.getName());
+                    state.setStatus(Status.NOT);
+                    return;
+                }
+                case SELECT_UNCHEST_NPC: {
+                    NPC chestOwner = CitiTrader.self.isChestLinked(state.getChestLocation());
+                    if (chestOwner != null) {
+                        if(!chestOwner.getTrait(Owner.class).isOwnedBy(by)) {
+                            by.sendMessage(ChatColor.RED + "You don't own the Linked NPC, you can't unlink this chest.");
+                            state.setStatus(Status.NOT);
+                            return;
+                        }
+                    }
+                    
+                    if (!state.getTrader().getTrait(StockRoomTrait.class).removeLinkedChest(state.getChestLocation())) {
+                        by.sendMessage(ChatColor.RED + "Chest could not be unlinked from Trader.");
+                        state.setStatus(Status.NOT);
+                        return;
+                    }
+
+                    by.sendMessage(ChatColor.GREEN + "Chest has been unlinked from " + npc.getName());
+                    state.setStatus(Status.NOT);
+                    return;
+                }
             }
 
         }
 
 
         if (by.getName().equalsIgnoreCase(owner) && by.getItemInHand().getType() == Material.BOOK) {
-            npc.getTrait(StockRoomTrait.class).openStockRoom(by);
-
+            if (!npc.getTrait(StockRoomTrait.class).hasLinkedChest()) {
+                npc.getTrait(StockRoomTrait.class).openStockRoom(by);
+            } else {
+                by.sendMessage(ChatColor.RED + "Trader has linked chests, use them to stock trader.");
+            }
         } else {
             if (!npc.getTrait(StockRoomTrait.class).getDisabled()) {
                 npc.getTrait(StockRoomTrait.class).openSalesWindow(by);
@@ -299,10 +380,10 @@ public class Trader implements Listener {
             state.getTrader().getTrait(StockRoomTrait.class).processInventoryClose(event);
         }
     }
-    
+
     @EventHandler
     public void onPlayerLogin(PlayerJoinEvent event) {
-        if(event.getPlayer().isOp() && CitiTrader.outdated) {
+        if (event.getPlayer().isOp() && CitiTrader.outdated) {
             event.getPlayer().sendMessage(ChatColor.GOLD + "Your version of Cititraders(" + CitiTrader.self.getDescription().getVersion() + ") is outdated, please update.");
         }
     }
