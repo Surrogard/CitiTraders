@@ -552,8 +552,6 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                 String playerName = player.getName();
                 if (CitiTrader.economy.has(playerName, cost)) {
                     if (CitiTrader.economy.withdrawPlayer(playerName, cost).type == ResponseType.SUCCESS) {
-
-                        //if(CitiTrader.economy.depositPlayer(storeOwner,cost).type==ResponseType.SUCCESS){
                         if (wallet.deposit(cost)) {
                             if (npc.getTrait(WalletTrait.class).getType() != WalletType.ADMIN) {
 
@@ -561,23 +559,19 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                                     Integer amount = isold.getAmount();
                                     double refund = 0;
                                     for (Entry<Location, String> loc : linkedChests.entrySet()) {
-                                        //if (loc.getKey().getBlock().getType().equals(Material.CHEST)) {
                                         if (locationIsBlock(loc.getKey(), Material.CHEST)) {
-                                            //if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
                                             if (!chestToFar(loc.getKey(), player)) {
                                                 Inventory blockInv = ((Chest) loc.getKey().getBlock().getState()).getBlockInventory();
                                                 for (Entry<Integer, ? extends ItemStack> e : blockInv.all(material).entrySet()) {
-                                                    //for (ItemStack isfor : ((Chest) loc.getKey().getBlock().getState()).getBlockInventory()) {
                                                     is.setAmount(e.getValue().getAmount());
                                                     if (e.getValue().equals(is)) {
-                                                        System.out.println("item found");
+                                                        //System.out.println("item found");
                                                         if (e.getValue().getAmount() > amount) {
-                                                            System.out.println("removing " + isold.toString());
+                                                            //System.out.println("removing " + isold.toString());
                                                             blockInv.removeItem(isold);
-                                                            //isold.setAmount(0);
                                                             amount = 0;
                                                         } else {
-                                                            System.out.println("removing " + e.toString());
+                                                            //System.out.println("removing " + e.toString());
                                                             blockInv.removeItem(e.getValue());
                                                             //isold.setAmount(isold.getAmount() - e.getValue().getAmount());
                                                             amount -= e.getValue().getAmount();
@@ -653,7 +647,6 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                 if (state.getTrader().getTrait(StockRoomTrait.class).hasLinkedChest()) {
                     for (Entry<Location, String> loc : state.getTrader().getTrait(StockRoomTrait.class).linkedChests.entrySet()) {
                         if (locationIsBlock(loc.getKey(), Material.CHEST)) {
-                            //if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
                             if (!chestToFar(loc.getKey(), ((Player)event.getPlayer()))) {
                                 Inventory blockInv = ((Chest) loc.getKey().getBlock().getState()).getBlockInventory();
                                 
@@ -665,9 +658,6 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
                         }
                     }
                 } else {
-                    //Inventory chkr = Bukkit.createInventory(null, 9 * 6);
-
-                    //chkr.setContents(state.getTrader().getTrait(StockRoomTrait.class).getInventory().getContents().clone());
                     if (!checkSpace(state.getTrader().getTrait(StockRoomTrait.class).getInventory(), is)) {
                         ((CommandSender) event.getPlayer()).sendMessage(ChatColor.RED + "Trader does not have enough space to hold something you sold him.");
                     } else {
@@ -728,11 +718,17 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
 
     }
 
+    /**
+     * 
+     * @param loc
+     * @param player
+     * @return 
+     */
     public boolean chestToFar(Location loc, Player player) {
         if (loc.distance(npc.getBukkitEntity().getLocation()) < 10) {
             return false;
         }
-        System.out.println("Chest too far away.");
+
         return true;
     }
 

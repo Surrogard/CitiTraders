@@ -21,8 +21,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.mcstats.Metrics;
 import org.mcstats.Metrics.Graph;
 
@@ -261,24 +261,32 @@ public class Trader implements Listener {
                     status.remove(by.getName());
                     return;
                 }
+                case BALANCE_MONEY: {
+                    WalletTrait wallet = state.getTrader().getTrait(WalletTrait.class);
+                    
+                    by.sendMessage(ChatColor.GOLD + "Traders balance is " + wallet.getAmount());
+                    status.remove(by.getName());
+                    return;
+                }
+                    
                 case SET_LINK: {
                     if (!state.getTrader().getTrait(StockRoomTrait.class).setLinkedNPC(state.getLinkedNPCName())) {
-                        by.sendMessage("Trader could not be linked to " + state.getLinkedNPCName());
+                        by.sendMessage(ChatColor.RED + "Trader could not be linked to " + state.getLinkedNPCName());
                         state.setStatus(Status.NOT);
                         return;
                     }
 
-                    by.sendMessage("Trader linked to " + state.getLinkedNPCName());
+                    by.sendMessage(ChatColor.GREEN + "Trader linked to " + state.getLinkedNPCName());
                     state.setStatus(Status.NOT);
                     return;
                 }
                 case REMOVE_LINK: {
                     if (!state.getTrader().getTrait(StockRoomTrait.class).removeLinkedNPC()) {
-                        by.sendMessage("Trader could not be unlinked.");
+                        by.sendMessage(ChatColor.RED + "Trader could not be unlinked.");
                         state.setStatus(Status.NOT);
                         return;
                     }
-                    by.sendMessage("Trader has been unlinked, he will use is own pricelist now.");
+                    by.sendMessage(ChatColor.GREEN + "Trader has been unlinked, he will use is own pricelist now.");
                     state.setStatus(Status.NOT);
                     return;
                 }

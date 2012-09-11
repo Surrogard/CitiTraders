@@ -297,6 +297,12 @@ public class CitiTrader extends JavaPlugin {
                     status.setMoney(Double.parseDouble(args[2]));
                     player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you would like to take money from.");
                 }
+                
+                if(args[1].equalsIgnoreCase("balance")) {
+                    TraderStatus status = Trader.getStatus(player.getName());
+                    status.setStatus(Status.BALANCE_MONEY);
+                    player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader to see his balance.");
+                }
                 return true;
             }
             case fire: {

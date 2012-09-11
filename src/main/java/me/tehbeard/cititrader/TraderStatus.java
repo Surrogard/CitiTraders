@@ -18,6 +18,7 @@ public class TraderStatus {
         SELL_BOX,
         GIVE_MONEY,
         TAKE_MONEY,
+        BALANCE_MONEY,
         FIRING,
         DISABLE,
         ENABLE,
@@ -26,7 +27,7 @@ public class TraderStatus {
         SELECT_LINK_CHEST,
         SELECT_UNLINK_CHEST,
         SELECT_CHEST_NPC,
-        SELECT_UNCHEST_NPC
+        SELECT_UNCHEST_NPC,
     }
     private NPC trader;
     private Status status = Status.NOT;
