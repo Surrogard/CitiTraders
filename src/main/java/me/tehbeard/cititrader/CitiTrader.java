@@ -269,6 +269,7 @@ public class CitiTrader extends JavaPlugin {
 
                 if (!type.hasPermission(sender)) {
                     sender.sendMessage(ChatColor.RED + "You don't have permission to use this wallet type!");
+                    return true;
                 }
 
                 state.setStatus(Status.SET_WALLET);
