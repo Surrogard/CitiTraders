@@ -306,8 +306,8 @@ public class Trader implements Listener {
                     }
 
                     int chestLimit = CitiTrader.self.getChestLimit(by);
-                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(StockRoomTrait.class).linkedChests.size()) {
-                        by.sendMessage(ChatColor.RED + "You cannot Link another Chest to this NPC.");
+                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(StockRoomTrait.class).linkedChests.size()-1) {
+                        by.sendMessage(ChatColor.RED + "You cannot Link another Chest to this NPC. (" + chestLimit + ")" + state.getTrader().getTrait(StockRoomTrait.class).linkedChests.size());
                         state.setStatus(Status.NOT);
                         return;
                     }
@@ -334,6 +334,15 @@ public class Trader implements Listener {
 
                     by.sendMessage(ChatColor.GREEN + "Chest has been unlinked from " + npc.getName());
                     state.setStatus(Status.NOT);
+                    return;
+                }
+                case SET_SELL_STACK: {
+                    if(!state.getTrader().getTrait(StockRoomTrait.class).setSellStack(by.getItemInHand(), state.getStackAmount())) {
+                        by.sendMessage("Something went wrong.");
+                        return;
+                    }
+                    by.sendMessage(ChatColor.GREEN + "Stack amount set.");
+                    status.remove(by.getName());
                     return;
                 }
             }

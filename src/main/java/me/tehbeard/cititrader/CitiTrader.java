@@ -368,6 +368,23 @@ public class CitiTrader extends JavaPlugin {
                 status.setStatus(Status.SELECT_UNLINK_CHEST);
                 return true;
             }
+            case sellstack: {
+                if(args.length < 2) {
+                    player.sendMessage(ChatColor.RED + "You need to input an amount /trader sellstack 16");
+                    return true;
+                }
+                if(args.length > 2) {
+                    player.sendMessage(ChatColor.RED + "You have to many arguements /trader sellstack 16");
+                }
+                TraderStatus status = Trader.getStatus(player.getName());
+                player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader with the item you want to set.");
+                status.setStackAmount(Integer.parseInt(args[1]));
+                status.setStatus(Status.SET_SELL_STACK);
+                return true;                
+            }
+            case buystack: {
+
+            }
         }
 
 
@@ -401,7 +418,9 @@ public class CitiTrader extends JavaPlugin {
         link,
         removelink,
         linkchest,
-        unlinkchest;
+        unlinkchest,
+        sellstack,
+        buystack;
     }
 
     private enum Style {

@@ -28,6 +28,8 @@ public class TraderStatus {
         SELECT_UNLINK_CHEST,
         SELECT_CHEST_NPC,
         SELECT_UNCHEST_NPC,
+        SET_SELL_STACK,
+        SET_BUY_STACK
     }
     private NPC trader;
     private Status status = Status.NOT;
@@ -40,6 +42,7 @@ public class TraderStatus {
     private String linkedNPCName;
     private Location chestLocation;
     private String chestCatagory;
+    private int stackamount;
     
     public String getAccName() {
         return accName;
@@ -115,5 +118,13 @@ public class TraderStatus {
     
     public void setChestLocation(Location value) {
         chestLocation = value;
+    }
+    
+    public void setStackAmount(int amount) {
+        stackamount = amount;
+    }
+    
+    public int getStackAmount() {
+        return stackamount;
     }
 }
