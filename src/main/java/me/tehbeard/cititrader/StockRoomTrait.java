@@ -266,6 +266,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             NPC linkedNPC = it.next();
             if (linkedNPC.getName().equals(name)) {
                 if (linkedNPC.hasTrait(StockRoomTrait.class)) {
+                    // Check to see trying to link to NPC that is already linked to this NPC.
                     if (linkedNPC.getTrait(StockRoomTrait.class).getLinkedNPC().getId() == npc.getId()) {
                         return false;
                     } else {
@@ -293,6 +294,11 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
     }
 
     public NPC getLinkedNPC() {
+        // Can't get NPC with id -1
+        if(linkedNPCID == -1) {
+            return null;
+        }
+        
         NPC linkedNPC = CitizensAPI.getNPCRegistry().getById(linkedNPCID);
         if (linkedNPC != null) {
             if (linkedNPC.hasTrait(StockRoomTrait.class)) {
