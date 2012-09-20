@@ -24,7 +24,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -276,11 +275,13 @@ public class StockRoomTrait extends Trait implements InventoryHolder, TraderInte
             if (linkedNPC.getName().equals(name)) {
                 if (linkedNPC.hasTrait(StockRoomTrait.class)) {
                     // Check to see trying to link to NPC that is already linked to this NPC.
-                    if (linkedNPC.getTrait(StockRoomTrait.class).getLinkedNPC().getId() == npc.getId()) {
-                        return false;
-                    } else {
-                        linkedNPCID = linkedNPC.getId();
+                    if (linkedNPC.getTrait(StockRoomTrait.class).getLinkedNPC() != null) {
+                        if (linkedNPC.getTrait(StockRoomTrait.class).getLinkedNPC().getId() == npc.getId()) {
+                            return false;
+                        }
                     }
+                        
+                    linkedNPCID = linkedNPC.getId();
                     return true;
                 }
             }

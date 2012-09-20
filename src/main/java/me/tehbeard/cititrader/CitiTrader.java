@@ -182,6 +182,7 @@ public class CitiTrader extends JavaPlugin {
                     state.setMoney(price);
                     sender.sendMessage(ChatColor.DARK_PURPLE + "Now right click with item to finish.");
                 }
+                sender.sendMessage(ChatColor.YELLOW + "Proper usage is: /trader sellprice <amount>");
                 return true;
             }
 
@@ -204,6 +205,7 @@ public class CitiTrader extends JavaPlugin {
                     state.setMoney(price);
                     sender.sendMessage(ChatColor.DARK_PURPLE + "Now right click with item to finish.");
                 }
+                sender.sendMessage(ChatColor.YELLOW + "Proper usage is: /trader buyprice <amount>");
                 return true;
             }
 
