@@ -210,7 +210,6 @@ public class CitiTrader extends JavaPlugin {
             }
 
             case setwallet: {
-
                 if (args.length < 2) {
                     sender.sendMessage(ChatColor.RED + "Wallet Type needed!");
                     return true;
