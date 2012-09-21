@@ -286,6 +286,7 @@ public class CitiTrader extends JavaPlugin {
                     TraderStatus status = Trader.getStatus(player.getName());
                     status.setStatus(Status.BALANCE_MONEY);
                     player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader to see his balance.");
+                    return true;
                 } else if (args[1].equalsIgnoreCase("balance") && args.length > 2) {
                     sender.sendMessage(ChatColor.RED + "No modifier is needed for balance.");
                     return true;
