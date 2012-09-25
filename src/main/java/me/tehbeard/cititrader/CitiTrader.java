@@ -399,7 +399,7 @@ public class CitiTrader extends JavaPlugin {
                     return true;
                 }
                 
-                if(!args[1].equalsIgnoreCase("buy") || !args[1].equalsIgnoreCase("sell")) {
+                if(!args[1].equalsIgnoreCase("buy") && !args[1].equalsIgnoreCase("sell")) {
                     player.sendMessage(ChatColor.RED + "Command syntax is /trader list <buy|sell>");
                     return true;
                 }
