@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
 import net.citizensnpcs.api.CitizensAPI;
@@ -74,7 +75,7 @@ public class Trader implements Listener {
                         e.printStackTrace();
                     }
                     if (CitiTrader.self.getConfig().getBoolean("debug.tradercount", false)) {
-                        CitiTrader.self.getLogger().info("Traders: " + totaltrader);
+                        CitiTrader.self.getLogger().log(Level.INFO, "Traders: {0}", totaltrader);
                     }
                     return totaltrader;
                 }
