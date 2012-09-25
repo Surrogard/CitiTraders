@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import me.tehbeard.cititrader.TraderStatus.Status;
 import me.tehbeard.cititrader.WalletTrait.WalletType;
@@ -24,6 +25,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
 import org.mcstats.Metrics;
 import org.mcstats.Metrics.Graph;
 
@@ -343,6 +345,25 @@ public class Trader implements Listener {
                         return;
                     }
                     by.sendMessage(ChatColor.GREEN + "Stack amount set.");
+                    status.remove(by.getName());
+                    return;
+                }
+                    
+                case LIST_SELL_PRICE: {
+                    Map<ItemStack, Double> price = state.getTrader().getTrait(StockRoomTrait.class).getSellPrices();
+                    by.sendMessage(ChatColor.GOLD + "---{Sell Prices}---");
+                    for (Entry<ItemStack, Double> item : price.entrySet()) {
+                        by.sendMessage(ChatColor.YELLOW + item.getKey().getType().name() + "   " + ChatColor.GREEN + item.getValue());
+                    }
+                    status.remove(by.getName());
+                    return;
+                }
+                case LIST_BUY_PRICE: {
+                    Map<ItemStack, Double> price = state.getTrader().getTrait(StockRoomTrait.class).getBuyPrices();
+                    by.sendMessage(ChatColor.GOLD + "---{Buy Prices}---");
+                    for (Entry<ItemStack, Double> item : price.entrySet()) {
+                        by.sendMessage(ChatColor.YELLOW + item.getKey().getType().name() + "   " + ChatColor.GREEN + item.getValue());
+                    }
                     status.remove(by.getName());
                     return;
                 }

@@ -393,6 +393,27 @@ public class CitiTrader extends JavaPlugin {
             case buystack: {
 
             }
+            case list: {
+                if(args.length != 2) {
+                    player.sendMessage(ChatColor.RED + "Command syntax is /trader list <buy|sell>");
+                    return true;
+                }
+                
+                if(!args[1].equalsIgnoreCase("buy") || !args[1].equalsIgnoreCase("sell")) {
+                    player.sendMessage(ChatColor.RED + "Command syntax is /trader list <buy|sell>");
+                    return true;
+                }
+                
+                TraderStatus status = Trader.getStatus(player.getName());
+                player.sendMessage(ChatColor.DARK_PURPLE + "Right click a Trader to see their price list.");
+                if(args[1].equalsIgnoreCase("buy")) {
+                    status.setStatus(Status.LIST_BUY_PRICE);
+                } else {
+                    status.setStatus(Status.LIST_SELL_PRICE);
+                }
+                
+                return true;
+            }
         }
 
 
@@ -428,7 +449,8 @@ public class CitiTrader extends JavaPlugin {
         linkchest,
         unlinkchest,
         sellstack,
-        buystack;
+        buystack,
+        list
     }
 
     private enum Style {

@@ -29,7 +29,9 @@ public class TraderStatus {
         SELECT_CHEST_NPC,
         SELECT_UNCHEST_NPC,
         SET_SELL_STACK,
-        SET_BUY_STACK
+        SET_BUY_STACK,
+        LIST_SELL_PRICE,
+        LIST_BUY_PRICE
     }
     private NPC trader;
     private Status status = Status.NOT;
