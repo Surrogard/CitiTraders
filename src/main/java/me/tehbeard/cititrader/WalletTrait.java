@@ -1,8 +1,5 @@
 package me.tehbeard.cititrader;
 
-import com.palmergames.bukkit.towny.object.Resident;
-import com.palmergames.bukkit.towny.object.Town;
-import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.citizensnpcs.api.exception.NPCLoadException;
@@ -79,21 +76,9 @@ public class WalletTrait extends Trait {
                 return true;
             case TOWN_BANK: {
                 if (CitiTrader.isTowny) {
-                    Hashtable<String, Resident> table = CitiTrader.towny.getTownyUniverse().getResidentMap();
-                    if (table.containsKey(npc.getTrait(Owner.class).getOwner())) {
-                        Resident res = table.get(npc.getTrait(Owner.class).getOwner());
-                        if (res.hasTown()) {
-                            try {
-                                Town town = res.getTown();
-                                if (res.isMayor() || town.getAssistants().contains(res)) {
-                                    EconomyResponse resp = CitiTrader.economy.depositPlayer(account, amount);
-                                    return resp.transactionSuccess();
-                                }
-                            } catch (Exception ex) {
-                                Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-
-                        }
+                    if (isMayorOrAssistant()) {
+                        EconomyResponse resp = CitiTrader.economy.depositPlayer(account, amount);
+                        return resp.transactionSuccess();
                     }
                 }
             }
@@ -128,22 +113,11 @@ public class WalletTrait extends Trait {
                 return true;
             case TOWN_BANK: {
                 if (CitiTrader.isTowny) {
-                    Hashtable<String, Resident> table = CitiTrader.towny.getTownyUniverse().getResidentMap();
-                    if (table.containsKey(npc.getTrait(Owner.class).getOwner())) {
-                        Resident res = table.get(npc.getTrait(Owner.class).getOwner());
-                        if (res.hasTown()) {
-                            try {
-                                Town town = res.getTown();
-                                if (res.isMayor() || town.getAssistants().contains(res)) {
-                                    EconomyResponse resp = CitiTrader.economy.withdrawPlayer(account, amount);
-                                    return resp.transactionSuccess();
-                                }
-                            } catch (Exception ex) {
-                                Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-
-                        }
+                    if (isMayorOrAssistant()) {
+                        EconomyResponse resp = CitiTrader.economy.withdrawPlayer(account, amount);
+                        return resp.transactionSuccess();
                     }
+
                 }
             }
         }
@@ -171,27 +145,9 @@ public class WalletTrait extends Trait {
                 return true;
             case TOWN_BANK: {
                 if (CitiTrader.isTowny) {
-                    Hashtable<String, Resident> table = CitiTrader.towny.getTownyUniverse().getResidentMap();
-                    if (table.containsKey(npc.getTrait(Owner.class).getOwner())) {
-                        Resident res = table.get(npc.getTrait(Owner.class).getOwner());
-                        if (res.hasTown()) {
-                            try {
-                                Town town = res.getTown();
-                                if (res.isMayor() || town.getAssistants().contains(res)) {
-                                    EconomyResponse resp = CitiTrader.economy.bankHas(account, amount);
-                                    return resp.transactionSuccess();
-                                    /*try {
-                                     return town.getHoldingBalance() >= amount;
-                                     } catch (EconomyException ex) {
-                                     Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
-                                     return false;
-                                     }*/
-                                }
-                            } catch (Exception ex) {
-                                Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-
-                        }
+                    if (isMayorOrAssistant()) {
+                        EconomyResponse resp = CitiTrader.economy.bankHas(account, amount);
+                        return resp.transactionSuccess();
                     }
                 }
             }
@@ -227,31 +183,46 @@ public class WalletTrait extends Trait {
                 return 0.0D;
             case TOWN_BANK:
                 if (CitiTrader.isTowny) {
-                    Hashtable<String, Resident> table = CitiTrader.towny.getTownyUniverse().getResidentMap();
-                    if (table.containsKey(npc.getTrait(Owner.class).getOwner())) {
-                        Resident res = table.get(npc.getTrait(Owner.class).getOwner());
-                        if (res.hasTown()) {
-                            try {
-                                Town town = res.getTown();
-                                if (res.isMayor() || town.getAssistants().contains(res)) {
-                                    EconomyResponse resp = CitiTrader.economy.bankBalance(account);
-                                    return resp.balance;
-                                    /*try {
-                                     return town.getHoldingBalance() >= amount;
-                                     } catch (EconomyException ex) {
-                                     Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
-                                     return false;
-                                     }*/
-                                }
-                            } catch (Exception ex) {
-                                Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-
-                        }
+                    if (isMayorOrAssistant()) {
+                        EconomyResponse resp = CitiTrader.economy.bankBalance(account);
+                        return resp.balance;
                     }
                 }
+                return 0.0;
         }
         throw new IllegalStateException("NO VALID WALLET TYPE SELECTED");
 
+    }
+
+    public boolean isMayorOrAssistant() {
+        com.palmergames.bukkit.towny.object.Resident resident;
+
+
+        try {
+            resident = com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().getResident(npc.getTrait(Owner.class).getOwner());
+        } catch (Exception ex) {
+            Logger.getLogger(CitiTrader.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
+            return true;
+        }
+
+        if (resident.hasTown()) {
+            try {
+                com.palmergames.bukkit.towny.object.Town town = resident.getTown();
+                if (resident.isMayor() || town.getAssistants().contains(resident)) {
+                    return true;
+
+
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(WalletTrait.class
+                        .getName()).log(Level.SEVERE, null, ex);
+
+                return false;
+            }
+        }
+
+        return false;
     }
 }

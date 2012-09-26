@@ -1,14 +1,10 @@
 package me.tehbeard.cititrader;
 
-import com.palmergames.bukkit.towny.Towny;
-import com.palmergames.bukkit.towny.object.Resident;
-import com.palmergames.bukkit.towny.object.Town;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.Hashtable;
 import java.util.Scanner;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -49,7 +45,6 @@ public class CitiTrader extends JavaPlugin {
     public static CitiTrader self;
     public static Economy economy;
     public static boolean outdated = false;
-    public static Towny towny;
     public static boolean isTowny = false;
     private static CitizensPlugin citizens;
     private static Attributes atts;
@@ -235,34 +230,41 @@ public class CitiTrader extends JavaPlugin {
 
                 if (type.equals(WalletType.TOWN_BANK)) {
                     if (CitiTrader.isTowny) {
-                        Hashtable<String, Resident> table = CitiTrader.towny.getTownyUniverse().getResidentMap();
-                        if (table.containsKey(sender.getName())) {
-                            Resident res = table.get(sender.getName());
-                            if (res.hasTown()) {
-                                Town town = null;
-                                try {
-                                    town = res.getTown();
-                                } catch (Exception ex) {
-                                    Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                                if (town != null) {
-                                    if (res.isMayor() || town.getAssistants().contains(res)) {
-                                        //sender.sendMessage(town.getEconomyName());
-                                        state.setAccName(town.getEconomyName());
-                                    } else {
-                                        sender.sendMessage(ChatColor.RED + "You are not the mayor or assistant of this town.");
-                                        return true;
-                                    }
-                                }
-                            } else {
-                                sender.sendMessage(ChatColor.RED + "You are not a resident of any town.");
-                                return true;
-                            }
-                        } else {
-                            sender.sendMessage(ChatColor.RED + "You are not a resident of any town.");
+                        //Hashtable<String, Resident> table = CitiTrader.towny.getTownyUniverse().getResidentMap();
+                        com.palmergames.bukkit.towny.object.Resident resident;
+                        try {                        
+                            resident = com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().getResident(player.getName());
+                        } catch (Exception ex) {
+                            Logger.getLogger(CitiTrader.class.getName()).log(Level.SEVERE, null, ex);
                             return true;
                         }
-                    } else {
+                            //if (table.containsKey(sender.getName())) {
+                                //Resident res = table.get(sender.getName());
+                                if (resident.hasTown()) {
+                                    com.palmergames.bukkit.towny.object.Town town = null;
+                                    try {
+                                        town = resident.getTown();
+                                    } catch (Exception ex) {
+                                        Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                    if (town != null) {
+                                        if (resident.isMayor() || town.getAssistants().contains(resident)) {
+                                            //sender.sendMessage(town.getEconomyName());
+                                            state.setAccName(town.getEconomyName());
+                                        } else {
+                                            sender.sendMessage(ChatColor.RED + "You are not the mayor or assistant of this town.");
+                                            return true;
+                                        }
+                                    }
+                                } else {
+                                    sender.sendMessage(ChatColor.RED + "You are not a resident of any town.");
+                                    return true;
+                                }
+                            //} else {
+                              //  sender.sendMessage(ChatColor.RED + "You are not a resident of any town.");
+                                //return true;
+                            //}
+                        }  else {
                         sender.sendMessage(ChatColor.RED + "Towny is not enabled on this server.");
                         return true;
                     }
@@ -281,8 +283,8 @@ public class CitiTrader extends JavaPlugin {
             }
 
             case wallet: {
-                
-                if(args[1].equalsIgnoreCase("balance") && args.length == 2) {
+
+                if (args[1].equalsIgnoreCase("balance") && args.length == 2) {
                     TraderStatus status = Trader.getStatus(player.getName());
                     status.setStatus(Status.BALANCE_MONEY);
                     player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader to see his balance.");
@@ -291,7 +293,7 @@ public class CitiTrader extends JavaPlugin {
                     sender.sendMessage(ChatColor.RED + "No modifier is needed for balance.");
                     return true;
                 }
-                
+
                 if (args.length < 3) {
                     sender.sendMessage(ChatColor.RED + "Transaction type and amount needed.");
                     return true;
@@ -310,8 +312,8 @@ public class CitiTrader extends JavaPlugin {
                     status.setMoney(Double.parseDouble(args[2]));
                     player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you would like to take money from.");
                 }
-                
-                
+
+
                 return true;
             }
             case fire: {
@@ -377,41 +379,40 @@ public class CitiTrader extends JavaPlugin {
                 return true;
             }
             case sellstack: {
-                if(args.length < 2) {
+                if (args.length < 2) {
                     player.sendMessage(ChatColor.RED + "You need to input an amount /trader sellstack 16");
                     return true;
                 }
-                if(args.length > 2) {
+                if (args.length > 2) {
                     player.sendMessage(ChatColor.RED + "You have to many arguements /trader sellstack 16");
                 }
                 TraderStatus status = Trader.getStatus(player.getName());
                 player.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader with the item you want to set.");
                 status.setStackAmount(Integer.parseInt(args[1]));
                 status.setStatus(Status.SET_SELL_STACK);
-                return true;                
+                return true;
             }
             case buystack: {
-
             }
             case list: {
-                if(args.length != 2) {
+                if (args.length != 2) {
                     player.sendMessage(ChatColor.RED + "Command syntax is /trader list <buy|sell>");
                     return true;
                 }
-                
-                if(!args[1].equalsIgnoreCase("buy") && !args[1].equalsIgnoreCase("sell")) {
+
+                if (!args[1].equalsIgnoreCase("buy") && !args[1].equalsIgnoreCase("sell")) {
                     player.sendMessage(ChatColor.RED + "Command syntax is /trader list <buy|sell>");
                     return true;
                 }
-                
+
                 TraderStatus status = Trader.getStatus(player.getName());
                 player.sendMessage(ChatColor.DARK_PURPLE + "Right click a Trader to see their price list.");
-                if(args[1].equalsIgnoreCase("buy")) {
+                if (args[1].equalsIgnoreCase("buy")) {
                     status.setStatus(Status.LIST_BUY_PRICE);
                 } else {
                     status.setStatus(Status.LIST_SELL_PRICE);
                 }
-                
+
                 return true;
             }
         }
@@ -512,7 +513,7 @@ public class CitiTrader extends JavaPlugin {
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -525,16 +526,12 @@ public class CitiTrader extends JavaPlugin {
         atts = mf.getMainAttributes();
     }
 
-    public boolean setupTowny() {
-        try {
-            if (Bukkit.getPluginManager().getPlugin("Towny") != null) {
-                towny = (Towny) Bukkit.getPluginManager().getPlugin("Towny");
+    public void setupTowny() {
+        if (Bukkit.getPluginManager().getPlugin("Towny") != null) {
+            if (getServer().getPluginManager().getPlugin("Towny").isEnabled() == true) {
                 CitiTrader.isTowny = true;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return true;
     }
 
     public void setupConfig() {
