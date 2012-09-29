@@ -199,6 +199,7 @@ public class CitiTrader extends JavaPlugin {
                     }
                     state.setMoney(price);
                     sender.sendMessage(ChatColor.DARK_PURPLE + "Now right click with item to finish.");
+                    return true;
                 }
                 sender.sendMessage(ChatColor.YELLOW + "Proper usage is: /trader buyprice <amount>");
                 return true;
@@ -229,45 +230,18 @@ public class CitiTrader extends JavaPlugin {
 
 
                 if (type.equals(WalletType.TOWN_BANK)) {
-                    if (CitiTrader.isTowny) {
-                        //Hashtable<String, Resident> table = CitiTrader.towny.getTownyUniverse().getResidentMap();
-                        com.palmergames.bukkit.towny.object.Resident resident;
-                        try {                        
-                            resident = com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().getResident(player.getName());
-                        } catch (Exception ex) {
-                            Logger.getLogger(CitiTrader.class.getName()).log(Level.SEVERE, null, ex);
-                            return true;
-                        }
-                            //if (table.containsKey(sender.getName())) {
-                                //Resident res = table.get(sender.getName());
-                                if (resident.hasTown()) {
-                                    com.palmergames.bukkit.towny.object.Town town = null;
-                                    try {
-                                        town = resident.getTown();
-                                    } catch (Exception ex) {
-                                        Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
-                                    if (town != null) {
-                                        if (resident.isMayor() || town.getAssistants().contains(resident)) {
-                                            //sender.sendMessage(town.getEconomyName());
-                                            state.setAccName(town.getEconomyName());
-                                        } else {
-                                            sender.sendMessage(ChatColor.RED + "You are not the mayor or assistant of this town.");
-                                            return true;
-                                        }
-                                    }
-                                } else {
-                                    sender.sendMessage(ChatColor.RED + "You are not a resident of any town.");
-                                    return true;
-                                }
-                            //} else {
-                              //  sender.sendMessage(ChatColor.RED + "You are not a resident of any town.");
-                                //return true;
-                            //}
-                        }  else {
-                        sender.sendMessage(ChatColor.RED + "Towny is not enabled on this server.");
+                    if (!CitiTrader.isTowny) {
+                        sender.sendMessage(ChatColor.RED + "Towny is not enabled on your server.");
+                        return false;
+                    }
+                    String bank = getTownBank(player);
+
+                    if (bank == null) {
+                        sender.sendMessage(ChatColor.RED + "You are not the mayor or assistant of this town.");
                         return true;
                     }
+                    state.setAccName(bank);
+
                 }
 
                 if (!type.hasPermission(sender)) {
@@ -528,6 +502,7 @@ public class CitiTrader extends JavaPlugin {
 
     public void setupTowny() {
         if (Bukkit.getPluginManager().getPlugin("Towny") != null) {
+            System.out.println("****************************************************************************");
             if (getServer().getPluginManager().getPlugin("Towny").isEnabled() == true) {
                 CitiTrader.isTowny = true;
             }
@@ -606,5 +581,64 @@ public class CitiTrader extends JavaPlugin {
             getLogger().warning("*-----------------------------------------------------*");
             outdated = true;
         }
+    }
+
+    public boolean isMayorOrAssistant(Player player) {
+        if (!CitiTrader.isTowny) {
+            return false;
+        }
+
+        com.palmergames.bukkit.towny.object.Resident resident;
+
+
+        try {
+            resident = com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().getResident(player.getName());
+        } catch (Exception ex) {
+            Logger.getLogger(CitiTrader.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
+            return false;
+        }
+
+        if (resident.hasTown()) {
+            try {
+                com.palmergames.bukkit.towny.object.Town town = resident.getTown();
+                if (resident.isMayor() || town.getAssistants().contains(resident)) {
+                    return true;
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public String getTownBank(Player player) {
+        if (!CitiTrader.isTowny) {
+            return null;
+        }
+
+        if (!isMayorOrAssistant(player)) {
+            return null;
+        }
+
+        com.palmergames.bukkit.towny.object.Resident resident;
+
+        try {
+            resident = com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().getResident(player.getName());
+        } catch (Exception ex) {
+            Logger.getLogger(CitiTrader.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
+            return null;
+        }
+        try {
+            return resident.getTown().getEconomyName();
+        } catch (Exception ex) {
+            Logger.getLogger(CitiTrader.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
     }
 }

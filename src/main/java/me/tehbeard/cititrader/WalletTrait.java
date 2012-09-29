@@ -146,8 +146,7 @@ public class WalletTrait extends Trait {
             case TOWN_BANK: {
                 if (CitiTrader.isTowny) {
                     if (isMayorOrAssistant()) {
-                        EconomyResponse resp = CitiTrader.economy.bankHas(account, amount);
-                        return resp.transactionSuccess();
+                        return CitiTrader.economy.has(account, amount);
                     }
                 }
             }
@@ -184,10 +183,12 @@ public class WalletTrait extends Trait {
             case TOWN_BANK:
                 if (CitiTrader.isTowny) {
                     if (isMayorOrAssistant()) {
-                        EconomyResponse resp = CitiTrader.economy.bankBalance(account);
-                        return resp.balance;
+                        //EconomyResponse resp = CitiTrader.economy.getBalance(account);
+                        //System.out.println(account + " " + resp.balance + " " + resp.type);
+                        return CitiTrader.economy.getBalance(account);
                     }
                 }
+                        System.out.println("No Mayor");
                 return 0.0;
         }
         throw new IllegalStateException("NO VALID WALLET TYPE SELECTED");
@@ -195,6 +196,10 @@ public class WalletTrait extends Trait {
     }
 
     public boolean isMayorOrAssistant() {
+        if (!CitiTrader.isTowny) {
+            return false;
+        }
+
         com.palmergames.bukkit.towny.object.Resident resident;
 
 
@@ -204,7 +209,7 @@ public class WalletTrait extends Trait {
             Logger.getLogger(CitiTrader.class
                     .getName()).log(Level.SEVERE, null, ex);
 
-            return true;
+            return false;
         }
 
         if (resident.hasTown()) {
@@ -212,13 +217,9 @@ public class WalletTrait extends Trait {
                 com.palmergames.bukkit.towny.object.Town town = resident.getTown();
                 if (resident.isMayor() || town.getAssistants().contains(resident)) {
                     return true;
-
-
                 }
             } catch (Exception ex) {
-                Logger.getLogger(WalletTrait.class
-                        .getName()).log(Level.SEVERE, null, ex);
-
+                Logger.getLogger(WalletTrait.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
             }
         }
