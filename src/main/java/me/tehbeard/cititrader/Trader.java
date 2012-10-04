@@ -100,7 +100,6 @@ public class Trader implements Listener {
     @EventHandler
     public void onLeftClick(EntityDamageEvent event) {
         if (!(event instanceof EntityDamageByEntityEvent)) {
-            Bukkit.broadcastMessage("Failed Spot One");
             return;
         }
         if (!CitizensAPI.getNPCRegistry().isNPC(event.getEntity())) {
