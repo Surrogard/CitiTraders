@@ -102,9 +102,9 @@ public class Trader implements Listener {
         if (!(event instanceof EntityDamageByEntityEvent)) {
             return;
         }
+        
         if (!CitizensAPI.getNPCRegistry().isNPC(event.getEntity())) {
             Bukkit.broadcastMessage("Failed Spot Two");
-            
             return;
         }
 
