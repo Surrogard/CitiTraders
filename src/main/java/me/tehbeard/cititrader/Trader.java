@@ -14,6 +14,7 @@ import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Owner;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,6 +22,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -95,6 +98,36 @@ public class Trader implements Listener {
     }
 
     @EventHandler
+    public void onLeftClick(EntityDamageEvent event) {
+        if (!(event instanceof EntityDamageByEntityEvent)) {
+            Bukkit.broadcastMessage("Failed Spot One");
+            return;
+        }
+        if (!CitizensAPI.getNPCRegistry().isNPC(event.getEntity())) {
+            Bukkit.broadcastMessage("Failed Spot Two");
+            return;
+        }
+
+        EntityDamageByEntityEvent devent = (EntityDamageByEntityEvent)event;
+        if (!(devent.getDamager() instanceof Player)) {
+            Bukkit.broadcastMessage("Failed Spot Three");
+            return;
+        }
+        NPC npc = CitizensAPI.getNPCRegistry().getNPC(event.getEntity());
+        Player player = (Player) devent.getDamager();
+        
+        if (!npc.hasTrait(StockRoomTrait.class)) {
+            Bukkit.broadcastMessage("Failed Spot Four");
+            return;
+        }
+        if (!npc.getTrait(StockRoomTrait.class).getDisabled()) {
+            npc.getTrait(StockRoomTrait.class).openBuyWindow(player);
+        } else {
+            player.sendMessage(ChatColor.DARK_PURPLE + "This trader is currently disabled.");
+        }
+    }
+    
+    /*@EventHandler
     public void onLeftClick(NPCLeftClickEvent event) {
         NPC npc = event.getNPC();
         Player by = event.getClicker();
@@ -108,7 +141,7 @@ public class Trader implements Listener {
             by.sendMessage(ChatColor.DARK_PURPLE + "This trader is currently disabled.");
         }
 
-    }
+    }*/
 
     @EventHandler
     public void onRightClick(PlayerInteractEvent event) {
