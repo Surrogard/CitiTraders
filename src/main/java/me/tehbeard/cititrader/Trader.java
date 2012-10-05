@@ -104,20 +104,20 @@ public class Trader implements Listener {
         }
         
         if (!CitizensAPI.getNPCRegistry().isNPC(event.getEntity())) {
-            Bukkit.broadcastMessage("Failed Spot Two");
+            //Bukkit.broadcastMessage("Failed Spot Two");
             return;
         }
 
         EntityDamageByEntityEvent devent = (EntityDamageByEntityEvent)event;
         if (!(devent.getDamager() instanceof Player)) {
-            Bukkit.broadcastMessage("Failed Spot Three");
+            //Bukkit.broadcastMessage("Failed Spot Three");
             return;
         }
         NPC npc = CitizensAPI.getNPCRegistry().getNPC(event.getEntity());
         Player player = (Player) devent.getDamager();
         
         if (!npc.hasTrait(StockRoomTrait.class)) {
-            Bukkit.broadcastMessage("Failed Spot Four");
+            //Bukkit.broadcastMessage("Failed Spot Four");
             return;
         }
         if (!npc.getTrait(StockRoomTrait.class).getDisabled()) {
