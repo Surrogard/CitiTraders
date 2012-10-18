@@ -1,10 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package me.tehbeard.cititrader;
+package me.tehbeard.cititrader.traits;
 
 import java.util.Map;
+import me.tehbeard.cititrader.StockRoomInterface;
+import me.tehbeard.cititrader.Trader;
+import me.tehbeard.cititrader.TraderStatus;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.util.DataKey;

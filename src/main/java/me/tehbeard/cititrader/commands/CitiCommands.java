@@ -5,10 +5,10 @@
 package me.tehbeard.cititrader.commands;
 
 import me.tehbeard.cititrader.CitiTrader;
-import me.tehbeard.cititrader.ShopTrait;
+import me.tehbeard.cititrader.traits.ShopTrait;
 import me.tehbeard.cititrader.Trader;
 import me.tehbeard.cititrader.TraderStatus;
-import me.tehbeard.cititrader.WalletTrait;
+import me.tehbeard.cititrader.traits.WalletTrait;
 import me.tehbeard.cititrader.utils.ArgumentPack;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;

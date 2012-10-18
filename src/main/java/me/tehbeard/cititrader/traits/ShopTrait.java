@@ -1,11 +1,15 @@
-package me.tehbeard.cititrader;
+package me.tehbeard.cititrader.traits;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import me.tehbeard.cititrader.CitiTrader;
+import me.tehbeard.cititrader.Trader;
+import me.tehbeard.cititrader.TraderInterface;
+import me.tehbeard.cititrader.TraderStatus;
 import me.tehbeard.cititrader.TraderStatus.Status;
-import me.tehbeard.cititrader.WalletTrait.WalletType;
+import me.tehbeard.cititrader.traits.WalletTrait.WalletType;
 import me.tehbeard.cititrader.utils.TraderUtils;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.exception.NPCLoadException;
@@ -307,6 +311,10 @@ public class ShopTrait extends Trait implements TraderInterface {
         return setLinkedChest(loc, "default");
     }
 
+    public Map<Location, String> getLinkedChests() {
+        return linkedChests;
+    }
+    
     public boolean hasLinkedChest() {
         if (linkedChests.size() > 0) {
             return true;

@@ -1,7 +1,8 @@
-package me.tehbeard.cititrader;
+package me.tehbeard.cititrader.traits;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import me.tehbeard.cititrader.CitiTrader;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.Owner;

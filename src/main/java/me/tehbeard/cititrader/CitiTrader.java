@@ -11,25 +11,19 @@ import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import junit.framework.Assert;
-import me.tehbeard.cititrader.TraderStatus.Status;
-import me.tehbeard.cititrader.WalletTrait.WalletType;
-import me.tehbeard.cititrader.utils.ArgumentPack;
+import me.tehbeard.cititrader.commands.CitiCommands;
+import me.tehbeard.cititrader.traits.ShopTrait;
+import me.tehbeard.cititrader.traits.StockRoomTrait;
+import me.tehbeard.cititrader.traits.WalletTrait;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.CitizensPlugin;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.TraitInfo;
-import net.citizensnpcs.api.trait.trait.MobType;
-import net.citizensnpcs.api.trait.trait.Owner;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -51,6 +45,8 @@ public class CitiTrader extends JavaPlugin {
     public static Attributes atts;
     private FileConfiguration profiles = null;
     private File profilesFile = null;
+    
+    private CitiCommands commands;
 
     @Override
     public void onEnable() {
@@ -61,12 +57,15 @@ public class CitiTrader extends JavaPlugin {
 
         if (setupEconomy()) {
             self = this;
-            citizens = (CitizensPlugin) Bukkit.getPluginManager().getPlugin("Citizens");
-            citizens.getTraitFactory().registerTrait(TraitInfo.create(ShopTrait.class).withName("stockroom"));
-            citizens.getTraitFactory().registerTrait(TraitInfo.create(WalletTrait.class).withName("wallet"));
+            //CitizensAPI = (CitizensPlugin) Bukkit.getPluginManager().getPlugin("Citizens");
+            CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(ShopTrait.class).withName("shop"));
+            CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(WalletTrait.class).withName("wallet"));
+            CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(StockRoomTrait.class).withName("stockroom"));
             //citizens.getCharacterManager().registerCharacter(new CharacterFactory(Trader.class).withName("trader"));
 
+            getCommand("trader").setExecutor(commands);
             Bukkit.getPluginManager().registerEvents(new Trader(), this);
+            
         } else {
             getLogger().severe("COULD NOT FIND AN ECONOMY PLUGIN");
         }
@@ -131,9 +130,7 @@ public class CitiTrader extends JavaPlugin {
             if (player.hasPermission(PERM_PREFIX + ".profile." + s)) {
                 limit = Math.max(getProfiles().getInt("profiles." + s + ".chest-limit"), limit);
             }
-
         }
-
         return limit;
     }
 
@@ -141,7 +138,7 @@ public class CitiTrader extends JavaPlugin {
         for (NPC npc : citizens.getNPCRegistry()) {
             if (npc.hasTrait(ShopTrait.class)) {
                 if (npc.getTrait(ShopTrait.class).hasLinkedChest()) {
-                    if (npc.getTrait(ShopTrait.class).linkedChests.containsKey(loc)) {
+                    if (npc.getTrait(ShopTrait.class).getLinkedChests().containsKey(loc)) {
                         return npc;
                     }
                 }

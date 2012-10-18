@@ -1,6 +1,6 @@
 package me.tehbeard.cititrader;
 
-import me.tehbeard.cititrader.WalletTrait.WalletType;
+import me.tehbeard.cititrader.traits.WalletTrait.WalletType;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Location;
 import org.bukkit.inventory.Inventory;

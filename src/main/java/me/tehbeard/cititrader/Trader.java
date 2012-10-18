@@ -1,5 +1,8 @@
 package me.tehbeard.cititrader;
 
+import me.tehbeard.cititrader.traits.WalletTrait;
+import me.tehbeard.cititrader.traits.StockRoomTrait;
+import me.tehbeard.cititrader.traits.ShopTrait;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -7,7 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import me.tehbeard.cititrader.TraderStatus.Status;
-import me.tehbeard.cititrader.WalletTrait.WalletType;
+import me.tehbeard.cititrader.traits.WalletTrait.WalletType;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.CitizensEnableEvent;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
@@ -342,8 +345,8 @@ public class Trader implements Listener {
                     }
 
                     int chestLimit = CitiTrader.self.getChestLimit(by);
-                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(ShopTrait.class).linkedChests.size()-1) {
-                        by.sendMessage(ChatColor.RED + "You cannot Link another Chest to this NPC. (" + chestLimit + ")" + state.getTrader().getTrait(ShopTrait.class).linkedChests.size());
+                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(ShopTrait.class).getLinkedChests().size()-1) {
+                        by.sendMessage(ChatColor.RED + "You cannot Link another Chest to this NPC. (" + chestLimit + ")" + state.getTrader().getTrait(ShopTrait.class).getLinkedChests().size());
                         state.setStatus(Status.NOT);
                         return;
                     }
