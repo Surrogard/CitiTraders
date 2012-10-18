@@ -1,3 +1,7 @@
 ## YAML Template.
 error:
   noecon: No Economy Found, can't load Shop and Wallet Traits.
+chests:
+  haslinkedstock: Trader has linked chests, use them to stock trader.
+shop:
+  disabled: This shop is currently disabled.

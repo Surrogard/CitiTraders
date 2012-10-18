@@ -416,16 +416,22 @@ public class Trader implements Listener {
 
 
         if (by.getName().equalsIgnoreCase(owner) && by.getItemInHand().getType() == Material.BOOK) {
-            if (!npc.getTrait(ShopTrait.class).hasLinkedChest()) {
-                npc.getTrait(StockRoomTrait.class).openStockRoom(by);
-            } else {
-                by.sendMessage(ChatColor.RED + "Trader has linked chests, use them to stock trader.");
+            if (npc.hasTrait(ShopTrait.class)) {
+                if (npc.getTrait(ShopTrait.class).hasLinkedChest()) {
+                    by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chests.haslinkedstock"));
+                    return;
+                }
             }
+            npc.getTrait(StockRoomTrait.class).openStockRoom(by);
         } else {
-            if (!npc.getTrait(ShopTrait.class).getDisabled()) {
-                npc.getTrait(ShopTrait.class).openSalesWindow(by);
-            } else {
-                by.sendMessage(ChatColor.DARK_PURPLE + "This shop is currently disabled.");
+            if (npc.hasTrait(ShopTrait.class)) {
+                if (!npc.getTrait(ShopTrait.class).getDisabled()) {
+                    npc.getTrait(ShopTrait.class).openSalesWindow(by);
+                } else {
+                    by.sendMessage(ChatColor.DARK_PURPLE + CitiTrader.self.getLang().getString("shop.disabled"));
+                }
+            } else if (npc.hasTrait(TraderTrait.class)) {
+                System.out.println("TraderTrait found!");
             }
         }
     }

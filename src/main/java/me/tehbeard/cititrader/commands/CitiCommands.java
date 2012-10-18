@@ -316,7 +316,7 @@ public class CitiCommands implements CommandExecutor {
             npcType = EntityType.fromName(argPack.getOption("type").toUpperCase());
         }
 
-        if (argPack.getOption("type") != null && plugin.isValidNPCType(player, argPack.getOption("style").toUpperCase())) {
+        if (argPack.getOption("style") != null && plugin.isValidTraderStyle(player)) {
             style = Style.valueOf(argPack.getOption("style").toUpperCase());
         }
 

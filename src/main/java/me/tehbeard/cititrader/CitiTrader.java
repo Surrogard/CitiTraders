@@ -68,8 +68,9 @@ public class CitiTrader extends JavaPlugin {
         }
 
         CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(StockRoomTrait.class).withName("stockroom"));
-        CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(TraderTrait.class).withName("trader"));
+        CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(TraderTrait.class).withName("villagetrader"));
 
+        commands = new CitiCommands(this);
         getCommand("trader").setExecutor(commands);
         Bukkit.getPluginManager().registerEvents(new Trader(), this);
 

@@ -13,6 +13,6 @@ import net.citizensnpcs.api.trait.Trait;
 public class TraderTrait extends Trait {
     
     public TraderTrait() {
-        super("trader");
+        super("villagetrader");
     }
 }
