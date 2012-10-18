@@ -71,7 +71,7 @@ public class Trader implements Listener {
                         Iterator it = CitizensAPI.getNPCRegistry().iterator();
                         while (it.hasNext()) {
                             NPC npcount = (NPC) it.next();
-                            if (npcount.hasTrait(StockRoomTrait.class)) {
+                            if (npcount.hasTrait(ShopTrait.class)) {
                                 totaltrader++;
                             }
                         }
@@ -116,12 +116,12 @@ public class Trader implements Listener {
         NPC npc = CitizensAPI.getNPCRegistry().getNPC(event.getEntity());
         Player player = (Player) devent.getDamager();
         
-        if (!npc.hasTrait(StockRoomTrait.class)) {
+        if (!npc.hasTrait(ShopTrait.class)) {
             //Bukkit.broadcastMessage("Failed Spot Four");
             return;
         }
-        if (!npc.getTrait(StockRoomTrait.class).getDisabled()) {
-            npc.getTrait(StockRoomTrait.class).openBuyWindow(player);
+        if (!npc.getTrait(ShopTrait.class).getDisabled()) {
+            npc.getTrait(ShopTrait.class).openBuyWindow(player);
         } else {
             player.sendMessage(ChatColor.DARK_PURPLE + "This trader is currently disabled.");
         }
@@ -176,11 +176,11 @@ public class Trader implements Listener {
     public void onRightClick(NPCRightClickEvent event) {
         NPC npc = event.getNPC();
         Player by = event.getClicker();
-        if (!npc.hasTrait(StockRoomTrait.class)) {
+        if (!npc.hasTrait(ShopTrait.class)) {
             return;
         }
 
-        if (!npc.getTrait(StockRoomTrait.class).isEnableRightClick()) {
+        if (!npc.getTrait(ShopTrait.class).isEnableRightClick()) {
             return;
         }
         TraderStatus state = getStatus(by.getName());
@@ -190,12 +190,12 @@ public class Trader implements Listener {
         if (by.getName().equalsIgnoreCase(owner) || by.getName().equalsIgnoreCase(npc.getName())) {
             switch (state.getStatus()) {
                 case DISABLE:
-                    state.getTrader().getTrait(StockRoomTrait.class).setDisabled(true);
+                    state.getTrader().getTrait(ShopTrait.class).setDisabled(true);
                     clearStatus(by.getName());
                     by.sendMessage(ChatColor.DARK_PURPLE + "Trader " + npc.getName() + " has been disabled.");
                     return;
                 case ENABLE:
-                    state.getTrader().getTrait(StockRoomTrait.class).setDisabled(false);
+                    state.getTrader().getTrait(ShopTrait.class).setDisabled(false);
                     clearStatus(by.getName());
                     by.sendMessage(ChatColor.DARK_PURPLE + "Trader " + npc.getName() + " has been enabled.");
                     return;
@@ -217,12 +217,12 @@ public class Trader implements Listener {
                     }
 
                     by.sendMessage(ChatColor.DARK_RED + "Firing trader!");
-                    npc.removeTrait(StockRoomTrait.class);
+                    npc.removeTrait(ShopTrait.class);
                     npc.removeTrait(WalletTrait.class);
                     npc.destroy();
                 }
                 case SET_PRICE_SELL: {
-                    state.getTrader().getTrait(StockRoomTrait.class).setSellPrice(by.getItemInHand(), state.getMoney());
+                    state.getTrader().getTrait(ShopTrait.class).setSellPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
                     if (state.getMoney() == -1) {
                         by.sendMessage(ChatColor.GREEN + "Item price removed.");
@@ -233,7 +233,7 @@ public class Trader implements Listener {
                 }
 
                 case SET_PRICE_BUY: {
-                    state.getTrader().getTrait(StockRoomTrait.class).setBuyPrice(by.getItemInHand(), state.getMoney());
+                    state.getTrader().getTrait(ShopTrait.class).setBuyPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
                     if (state.getMoney() == -1) {
                         by.sendMessage(ChatColor.GREEN + "Item price removed.");
@@ -306,7 +306,7 @@ public class Trader implements Listener {
                 }
                     
                 case SET_LINK: {
-                    if (!state.getTrader().getTrait(StockRoomTrait.class).setLinkedNPC(state.getLinkedNPCName())) {
+                    if (!state.getTrader().getTrait(ShopTrait.class).setLinkedNPC(state.getLinkedNPCName())) {
                         by.sendMessage(ChatColor.RED + "Trader could not be linked to " + state.getLinkedNPCName());
                         state.setStatus(Status.NOT);
                         return;
@@ -317,7 +317,7 @@ public class Trader implements Listener {
                     return;
                 }
                 case REMOVE_LINK: {
-                    if (!state.getTrader().getTrait(StockRoomTrait.class).removeLinkedNPC()) {
+                    if (!state.getTrader().getTrait(ShopTrait.class).removeLinkedNPC()) {
                         by.sendMessage(ChatColor.RED + "Trader could not be unlinked.");
                         state.setStatus(Status.NOT);
                         return;
@@ -335,15 +335,15 @@ public class Trader implements Listener {
                             return;
                         }
                     }
-                    if (!state.getTrader().getTrait(StockRoomTrait.class).setLinkedChest(state.getChestLocation())) {
+                    if (!state.getTrader().getTrait(ShopTrait.class).setLinkedChest(state.getChestLocation())) {
                         by.sendMessage(ChatColor.RED + "Chest could not be linked to Trader.");
                         state.setStatus(Status.NOT);
                         return;
                     }
 
                     int chestLimit = CitiTrader.self.getChestLimit(by);
-                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(StockRoomTrait.class).linkedChests.size()-1) {
-                        by.sendMessage(ChatColor.RED + "You cannot Link another Chest to this NPC. (" + chestLimit + ")" + state.getTrader().getTrait(StockRoomTrait.class).linkedChests.size());
+                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(ShopTrait.class).linkedChests.size()-1) {
+                        by.sendMessage(ChatColor.RED + "You cannot Link another Chest to this NPC. (" + chestLimit + ")" + state.getTrader().getTrait(ShopTrait.class).linkedChests.size());
                         state.setStatus(Status.NOT);
                         return;
                     }
@@ -362,7 +362,7 @@ public class Trader implements Listener {
                         }
                     }
                     
-                    if (!state.getTrader().getTrait(StockRoomTrait.class).removeLinkedChest(state.getChestLocation())) {
+                    if (!state.getTrader().getTrait(ShopTrait.class).removeLinkedChest(state.getChestLocation())) {
                         by.sendMessage(ChatColor.RED + "Chest could not be unlinked from Trader.");
                         state.setStatus(Status.NOT);
                         return;
@@ -373,7 +373,7 @@ public class Trader implements Listener {
                     return;
                 }
                 case SET_SELL_STACK: {
-                    if(!state.getTrader().getTrait(StockRoomTrait.class).setSellStack(by.getItemInHand(), state.getStackAmount())) {
+                    if(!state.getTrader().getTrait(ShopTrait.class).setSellStack(by.getItemInHand(), state.getStackAmount())) {
                         by.sendMessage("Something went wrong.");
                         return;
                     }
@@ -383,7 +383,7 @@ public class Trader implements Listener {
                 }
                     
                 case LIST_SELL_PRICE: {
-                    Map<ItemStack, Double> price = state.getTrader().getTrait(StockRoomTrait.class).getSellPrices();
+                    Map<ItemStack, Double> price = state.getTrader().getTrait(ShopTrait.class).getSellPrices();
                     by.sendMessage(ChatColor.GOLD + "---{Sell Prices}---");
                     for (Entry<ItemStack, Double> item : price.entrySet()) {
                         by.sendMessage(ChatColor.YELLOW + item.getKey().getType().name() + "   " + ChatColor.GREEN + item.getValue());
@@ -392,7 +392,7 @@ public class Trader implements Listener {
                     return;
                 }
                 case LIST_BUY_PRICE: {
-                    Map<ItemStack, Double> price = state.getTrader().getTrait(StockRoomTrait.class).getBuyPrices();
+                    Map<ItemStack, Double> price = state.getTrader().getTrait(ShopTrait.class).getBuyPrices();
                     by.sendMessage(ChatColor.GOLD + "---{Buy Prices}---");
                     for (Entry<ItemStack, Double> item : price.entrySet()) {
                         by.sendMessage(ChatColor.YELLOW + item.getKey().getType().name() + "   " + ChatColor.GREEN + item.getValue());
@@ -406,14 +406,14 @@ public class Trader implements Listener {
 
 
         if (by.getName().equalsIgnoreCase(owner) && by.getItemInHand().getType() == Material.BOOK) {
-            if (!npc.getTrait(StockRoomTrait.class).hasLinkedChest()) {
+            if (!npc.getTrait(ShopTrait.class).hasLinkedChest()) {
                 npc.getTrait(StockRoomTrait.class).openStockRoom(by);
             } else {
                 by.sendMessage(ChatColor.RED + "Trader has linked chests, use them to stock trader.");
             }
         } else {
-            if (!npc.getTrait(StockRoomTrait.class).getDisabled()) {
-                npc.getTrait(StockRoomTrait.class).openSalesWindow(by);
+            if (!npc.getTrait(ShopTrait.class).getDisabled()) {
+                npc.getTrait(ShopTrait.class).openSalesWindow(by);
             } else {
                 by.sendMessage(ChatColor.DARK_PURPLE + "This shop is currently disabled.");
             }
@@ -421,8 +421,8 @@ public class Trader implements Listener {
     }
 
     public static void setUpNPC(NPC npc) {
-        if (!npc.hasTrait(StockRoomTrait.class)) {
-            npc.addTrait(StockRoomTrait.class);
+        if (!npc.hasTrait(ShopTrait.class)) {
+            npc.addTrait(ShopTrait.class);
 
         }
 
@@ -437,7 +437,7 @@ public class Trader implements Listener {
         TraderStatus state = getStatus(event.getWhoClicked().getName());
 
         if (state.getStatus() != Status.NOT) {
-            state.getTrader().getTrait(StockRoomTrait.class).processInventoryClick(event);
+            state.getTrader().getTrait(ShopTrait.class).processInventoryClick(event);
         }
     }
 
@@ -449,7 +449,7 @@ public class Trader implements Listener {
     public void inventoryClose(InventoryCloseEvent event) {
         TraderStatus state = getStatus(event.getPlayer().getName());
         if (state.getStatus() != Status.NOT) {
-            state.getTrader().getTrait(StockRoomTrait.class).processInventoryClose(event);
+            state.getTrader().getTrait(ShopTrait.class).processInventoryClose(event);
         }
     }
 

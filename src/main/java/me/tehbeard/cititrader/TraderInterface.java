@@ -41,20 +41,6 @@ public interface TraderInterface {
     public void setBuyPrice(ItemStack is,double price);
     
     /**
-     * Does the trader have this stock.
-     * @param locate
-     * @param checkAmount
-     * @return
-     */
-    public boolean hasStock(ItemStack locate,boolean checkAmount);
-    
-    /**
-     * Opens the stock room inventory to 
-     * the supplied player.
-     */
-    public void openStockRoom(Player player);
-    
-    /**
      * Opens window and sets up player to purchase from this NPC
      * @param player
      */
@@ -78,5 +64,11 @@ public interface TraderInterface {
      */
     public void processInventoryClose(InventoryCloseEvent event);
     
-    public boolean isStockRoomEmpty();
+    /**
+     * Does the trader have this stock.
+     * @param locate
+     * @param checkAmount
+     * @return
+     */
+    public boolean hasStock(ItemStack locate,boolean checkAmount);
 }
