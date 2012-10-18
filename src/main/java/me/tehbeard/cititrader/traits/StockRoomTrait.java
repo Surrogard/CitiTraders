@@ -38,6 +38,21 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
 
     @Override
     public void load(DataKey data) throws NPCLoadException {
+        
+        // First Tries at Conversion
+        if (data.keyExists("prices") || data.keyExists("buyprices") || data.keyExists("disabled") || data.keyExists("linkedNPCID") || data.keyExists("chests")) {
+            if (!npc.hasTrait(ShopTrait.class)) {
+                npc.addTrait(ShopTrait.class);
+                npc.getTrait(ShopTrait.class).load(data);
+            }
+            
+            data.removeKey("prices");
+            data.removeKey("buyprices");
+            data.removeKey("disabled");
+            data.removeKey("linkedNPCID");
+            data.removeKey("chests");
+        }
+        
         //Load the inventory
         for (DataKey slotKey : data.getRelative("inv").getIntegerSubKeys()) {
             stock.setItem(Integer.parseInt(slotKey.name()), ItemStorage.loadItemStack(slotKey));
@@ -47,10 +62,11 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
     @Override
     public void save(DataKey data) {
         //save the inventory
+        data.removeKey("inv");
+        DataKey inv = data.getRelative("inv");
         int i = 0;
         for (ItemStack is : stock.getContents()) {
             if (is != null) {
-                DataKey inv = data.getRelative("inv");
                 ItemStorage.saveItem(inv.getRelative("" + i++), is);
             }
         }

@@ -12,3 +12,4 @@ trader-types:
 debug:
   tradercount: false
   versioncheck: true
+language: en

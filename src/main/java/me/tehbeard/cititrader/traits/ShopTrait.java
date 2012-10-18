@@ -39,8 +39,6 @@ public class ShopTrait extends Trait implements TraderInterface {
     Map<Location, String> linkedChests;
     Map<ItemStack, Integer> stackSizes;
     Map<ItemStack, Integer> buyStackSizes;
-    boolean enableLeftClick;
-    boolean enableRightClick;
     boolean disabled;
     int linkedNPCID;
 
@@ -51,8 +49,6 @@ public class ShopTrait extends Trait implements TraderInterface {
         linkedChests = new HashMap<Location, String>();
         stackSizes = new HashMap<ItemStack, Integer>();
         buyStackSizes = new HashMap<ItemStack, Integer>();
-        enableLeftClick = true;
-        enableRightClick = true;
         disabled = false;
         linkedNPCID = -1;
     }
@@ -116,8 +112,6 @@ public class ShopTrait extends Trait implements TraderInterface {
     @Override
     public void save(DataKey data) {
 
-        data.setBoolean("enableRightClick", enableRightClick);
-        data.setBoolean("enableLeftClick", enableLeftClick);
         data.setBoolean("disabled", disabled);
         data.setInt("linkedNPCID", linkedNPCID);
 
@@ -803,22 +797,6 @@ public class ShopTrait extends Trait implements TraderInterface {
         }
 
         return true;
-    }
-
-    public boolean isEnableLeftClick() {
-        return enableLeftClick;
-    }
-
-    public void setEnableLeftClick(boolean enableLeftClick) {
-        this.enableLeftClick = enableLeftClick;
-    }
-
-    public boolean isEnableRightClick() {
-        return enableRightClick;
-    }
-
-    public void setEnableRightClick(boolean enableRightClick) {
-        this.enableRightClick = enableRightClick;
     }
 
     public void buildSellWindow(final ItemStack item, final TraderStatus state) {

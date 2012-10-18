@@ -4,10 +4,15 @@
  */
 package me.tehbeard.cititrader.traits;
 
+import net.citizensnpcs.api.trait.Trait;
+
 /**
  *
  * @author tenowg
  */
-public class TraderTrait {
+public class TraderTrait extends Trait {
     
+    public TraderTrait() {
+        super("trader");
+    }
 }

@@ -9,7 +9,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
+import me.tehbeard.cititrader.CitiTrader.Style;
 import me.tehbeard.cititrader.TraderStatus.Status;
+import me.tehbeard.cititrader.traits.TraderTrait;
 import me.tehbeard.cititrader.traits.WalletTrait.WalletType;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.CitizensEnableEvent;
@@ -192,7 +194,7 @@ public class Trader implements Listener {
                 return;
             }
         }
-        
+
         TraderStatus state = getStatus(by.getName());
         state.setTrader(npc);
         String owner = npc.getTrait(Owner.class).getOwner();
@@ -428,15 +430,19 @@ public class Trader implements Listener {
         }
     }
 
-    public static void setUpNPC(NPC npc) {
-        if (!npc.hasTrait(ShopTrait.class)) {
-            npc.addTrait(ShopTrait.class);
+    public static void setUpNPC(NPC npc, Style style) {
+        if (style.equals(Style.TRADER)) {
+            if (!npc.hasTrait(ShopTrait.class)) {
+                npc.addTrait(ShopTrait.class);
+            }
 
-        }
-
-        if (!npc.hasTrait(WalletTrait.class)) {
-            npc.addTrait(WalletTrait.class);
-
+            if (!npc.hasTrait(WalletTrait.class)) {
+                npc.addTrait(WalletTrait.class);
+            }
+        } else {
+            if (!npc.hasTrait(TraderTrait.class)) {
+                npc.addTrait(TraderTrait.class);
+            }
         }
     }
 

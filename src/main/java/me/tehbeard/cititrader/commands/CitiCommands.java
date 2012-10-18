@@ -5,6 +5,7 @@
 package me.tehbeard.cititrader.commands;
 
 import me.tehbeard.cititrader.CitiTrader;
+import me.tehbeard.cititrader.CitiTrader.Style;
 import me.tehbeard.cititrader.traits.ShopTrait;
 import me.tehbeard.cititrader.Trader;
 import me.tehbeard.cititrader.TraderStatus;
@@ -28,11 +29,11 @@ import org.bukkit.entity.Player;
 public class CitiCommands implements CommandExecutor {
 
     private CitiTrader plugin;
-    
+
     public CitiCommands(CitiTrader instance) {
         plugin = instance;
     }
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command command,
             String label, String[] args) {
@@ -56,53 +57,8 @@ public class CitiCommands implements CommandExecutor {
             return false;
         }
         switch (subCom) {
-            case create: {
-                ArgumentPack argPack = new ArgumentPack(new String[0], new String[]{"type", "style"}, compact(args, 1));
-                EntityType npcType = EntityType.PLAYER;
-                if (argPack.getOption("type") != null && plugin.isValidNPCType(player, argPack.getOption("type").toUpperCase())) {
-                    npcType = EntityType.fromName(argPack.getOption("type").toUpperCase());
-                }
-
-                //TODO: UNCOMMENT WHEN 1.3 COMES OUT
-            /*if(argPack.getOption("type")!=null && isValidNPCType(player,argPack.getOption("style").toUpperCase())){
-                 character = Style.valueOf(argPack.getOption("style").toUpperCase()).getCharacter();
-                 }*/
-                if (argPack.size() != 1) {
-                    sender.sendMessage(ChatColor.RED + "Invalid format of arguments");
-                }
-
-                String npcName = argPack.get(0);
-
-                int owned = 0;
-
-                for (NPC npc : CitizensAPI.getNPCRegistry()) {
-                    if (npc.hasTrait(ShopTrait.class)) {
-                        if (npc.getTrait(Owner.class).getOwner().equalsIgnoreCase(player.getName())) {
-
-                            owned += 1;
-                        }
-                    }
-                }
-                int traderLimit = plugin.getTraderLimit(player);
-                if (traderLimit != -1 && traderLimit <= owned) {
-                    sender.sendMessage(ChatColor.RED + "Cannot spawn another trader NPC!");
-                    return true;
-                }
-
-
-
-                //, character);
-                NPC npc = CitizensAPI.getNPCRegistry().createNPC(npcType, npcName);
-
-                npc.getTrait(MobType.class).setType(npcType);
-                npc.getTrait(Owner.class).setOwner(player.getName());
-
-                npc.spawn(player.getLocation());
-                Trader.setUpNPC(npc);
-
-                return true;
-
-            }
+            case create: 
+                return create(sender, command, label, args);
             case sellprice: {
                 if (args.length == 2) {
                     TraderStatus state = Trader.getStatus(((Player) sender).getName());
@@ -350,7 +306,58 @@ public class CitiCommands implements CommandExecutor {
         return s;
     }
 
+    public boolean create(CommandSender sender, Command command, String label, String[] args) {
+        Player player = (Player) sender;
+        ArgumentPack argPack = new ArgumentPack(new String[0], new String[]{"type", "style"}, compact(args, 1));
+        EntityType npcType = EntityType.PLAYER;
+        Style style = Style.TRADER;
+        
+        if (argPack.getOption("type") != null && plugin.isValidNPCType(player, argPack.getOption("type").toUpperCase())) {
+            npcType = EntityType.fromName(argPack.getOption("type").toUpperCase());
+        }
+
+        if (argPack.getOption("type") != null && plugin.isValidNPCType(player, argPack.getOption("style").toUpperCase())) {
+            style = Style.valueOf(argPack.getOption("style").toUpperCase());
+        }
+
+        if (argPack.size() != 1) {
+            sender.sendMessage(ChatColor.RED + "Invalid format of arguments");
+            return true;
+        }
+
+        String npcName = argPack.get(0);
+
+        int owned = 0;
+
+        for (NPC npc : CitizensAPI.getNPCRegistry()) {
+            if (npc.hasTrait(ShopTrait.class)) {
+                if (npc.getTrait(Owner.class).getOwner().equalsIgnoreCase(player.getName())) {
+                    owned += 1;
+                }
+            }
+        }
+        
+        int traderLimit = plugin.getTraderLimit(player);
+        if (traderLimit != -1 && traderLimit <= owned) {
+            sender.sendMessage(ChatColor.RED + "Cannot spawn another trader NPC!");
+            return true;
+        }
+
+        //, character);
+        NPC npc = CitizensAPI.getNPCRegistry().createNPC(npcType, npcName);
+
+        npc.getTrait(MobType.class).setType(npcType);
+        npc.getTrait(Owner.class).setOwner(player.getName());
+
+        npc.spawn(player.getLocation());
+        
+        Trader.setUpNPC(npc, style);
+
+        return true;
+    }
+
     private enum Subcommand {
+
         sellprice,
         buyprice,
         create,

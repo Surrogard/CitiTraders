@@ -14,6 +14,7 @@ import junit.framework.Assert;
 import me.tehbeard.cititrader.commands.CitiCommands;
 import me.tehbeard.cititrader.traits.ShopTrait;
 import me.tehbeard.cititrader.traits.StockRoomTrait;
+import me.tehbeard.cititrader.traits.TraderTrait;
 import me.tehbeard.cititrader.traits.WalletTrait;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.CitizensPlugin;
@@ -45,30 +46,32 @@ public class CitiTrader extends JavaPlugin {
     public static Attributes atts;
     private FileConfiguration profiles = null;
     private File profilesFile = null;
-    
+    private FileConfiguration languages = null;
+    private File languageFile = null;
     private CitiCommands commands;
 
     @Override
     public void onEnable() {
         setupConfig();
-        this.reloadProfiles();
+        reloadProfiles();
+        reloadLanguage();
 
         setupTowny();
 
+        self = this;
+
         if (setupEconomy()) {
-            self = this;
-            //CitizensAPI = (CitizensPlugin) Bukkit.getPluginManager().getPlugin("Citizens");
             CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(ShopTrait.class).withName("shop"));
             CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(WalletTrait.class).withName("wallet"));
-            CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(StockRoomTrait.class).withName("stockroom"));
-            //citizens.getCharacterManager().registerCharacter(new CharacterFactory(Trader.class).withName("trader"));
-
-            getCommand("trader").setExecutor(commands);
-            Bukkit.getPluginManager().registerEvents(new Trader(), this);
-            
         } else {
-            getLogger().severe("COULD NOT FIND AN ECONOMY PLUGIN");
+            getLogger().severe(getLang().getString("error.noecon"));
         }
+
+        CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(StockRoomTrait.class).withName("stockroom"));
+        CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(TraderTrait.class).withName("trader"));
+
+        getCommand("trader").setExecutor(commands);
+        Bukkit.getPluginManager().registerEvents(new Trader(), this);
 
         try {
             this.getManifest();
@@ -87,14 +90,18 @@ public class CitiTrader extends JavaPlugin {
         return (economy != null);
     }
 
-    private enum Style {
+    public enum Style {
 
-        trader("trader"),
-        villager("villagertrader");
+        TRADER("trader"),
+        VILLAGER("villagertrader");
         private String charName;
 
         private Style(String charName) {
             this.charName = charName;
+        }
+
+        public String getStyle() {
+            return charName;
         }
     }
 
@@ -203,6 +210,39 @@ public class CitiTrader extends JavaPlugin {
             getProfiles().save(profilesFile);
         } catch (IOException ex) {
             this.getLogger().log(Level.SEVERE, "Could not save config to " + profilesFile, ex);
+        }
+    }
+
+    public void reloadLanguage() {
+        languageFile = new File(this.getDataFolder() + File.separator + "lang", getConfig().getString("language") + ".yml");
+        languages = YamlConfiguration.loadConfiguration(languageFile);
+
+        // Look for defaults in the jar
+        InputStream defConfigStream = this.getResource("en.yml");
+
+        if (defConfigStream != null) {
+            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+            languages.setDefaults(defConfig);
+            languages.options().copyDefaults(true);
+        }
+        this.saveLanguage();
+    }
+
+    public FileConfiguration getLang() {
+        if (languages == null) {
+            this.reloadLanguage();
+        }
+        return profiles;
+    }
+
+    public void saveLanguage() {
+        if (languages == null || languageFile == null) {
+            return;
+        }
+        try {
+            getProfiles().save(languageFile);
+        } catch (IOException ex) {
+            this.getLogger().log(Level.SEVERE, "Could not save config to " + languageFile, ex);
         }
     }
 
