@@ -1,6 +1,7 @@
 package me.tehbeard.cititrader.traits;
 
 import java.util.Map;
+import me.tehbeard.cititrader.CitiTrader;
 import me.tehbeard.cititrader.StockRoomInterface;
 import me.tehbeard.cititrader.Trader;
 import me.tehbeard.cititrader.TraderStatus;
@@ -33,7 +34,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
             throw new IllegalArgumentException("Size must be between 1 and 54");
         }
 
-        stock = Bukkit.createInventory(this, size, "Stockroom");
+        stock = Bukkit.createInventory(this, size, CitiTrader.self.getLang().getString("shop.stockroom"));
     }
 
     @Override

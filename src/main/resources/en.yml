@@ -1,7 +1,47 @@
 ## YAML Template.
 error:
   noecon: No Economy Found, can't load Shop and Wallet Traits.
-chests:
-  haslinkedstock: Trader has linked chests, use them to stock trader.
 shop:
   disabled: This shop is currently disabled.
+  linkNPC: Right click the NPC you want to link.
+  unlinkNPC: Right click the NPC you want to unlink.
+  enabled: Trader %s has been enabled.
+  disabled: Trader %s has been disabled.
+  stockroom: Stockroom
+  cantfirestock: Cannot fire trader! He still has items on him!
+  cantfiremoney: Trader still has money in their wallet!
+  fired: Firing Trader!
+  priceremoved: Item price removed.
+  priceadded: Sell price set.
+  buypriceadded: Buy price set.
+wallet:
+  infoset: Wallet information set
+  econaccount: Cannot use give/take on traders who use economy backed accounts.
+  nsf: Not enough funds.
+  cantgive: Cannot give trader the money.
+  canttake: Cannot take the money.
+  cantgivewallet: Cannot give trader the money from your wallet.
+  canttakewallet: Cannot take the money from the trader's wallet.
+  given: Money given.
+  taken: Money taken.
+  balance: Traders balance is %d
+link:
+  cantlink: Trader could not be linked to %s
+  linked: Trader linked to %s
+  cantunlink: Trader could not be unlinked.
+  unlinked: Trader has been unlinked, he will use is own pricelist now.
+chest:
+  alreadylinked: Chest is already linked to a different Owner.
+  cantlink: Chest could not be linked to Trader.
+  overlimit: You cannot Link another Chest to this NPC.
+  linked: Chest has been linked to %s
+  notowned: You don't own the Linked NPC, you can't unlink this chest.
+  cantunlink: Chest could not be unlinked from Trader.
+  unlinked: Chest has been unlinked from %s
+  haslinkedstock: Trader has linked chests, use them to stock trader.
+stack:
+  error: Something went wrong.
+  stackset: Stack amount set.
+price:
+  sellprices: ---{Sell Prices}---
+  buyprices: ---{Buy Prices}---

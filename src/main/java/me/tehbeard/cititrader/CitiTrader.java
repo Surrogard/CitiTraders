@@ -167,7 +167,6 @@ public class CitiTrader extends JavaPlugin {
 
     public void setupTowny() {
         if (Bukkit.getPluginManager().getPlugin("Towny") != null) {
-            System.out.println("****************************************************************************");
             if (getServer().getPluginManager().getPlugin("Towny").isEnabled() == true) {
                 CitiTrader.isTowny = true;
             }
@@ -268,15 +267,15 @@ public class CitiTrader extends JavaPlugin {
         }
         returnString = returnString.trim();
         if (!returnString.equals(this.getDescription().getVersion())) {
-            String warning = String.format("%-9s %-12s %32s", "|", this.getDescription().getVersion(), "|");
-            String newversion = String.format("%-9s %-12s %32s", "|", returnString, "|");
-            getLogger().warning("*-----------------------------------------------------*");
-            getLogger().warning("|    CitiTraders                                      |");
-            getLogger().warning("|      Version is outofdate:                          |");
+            String warning = String.format("%-9s %-12s %28s", "|", this.getDescription().getVersion(), "|");
+            String newversion = String.format("%-9s %-12s %28s", "|", returnString, "|");
+            getLogger().warning("*-------------------------------------------------*");
+            getLogger().warning("|    CitiTraders                                  |");
+            getLogger().warning("|      Version is outofdate:                      |");
             getLogger().warning(warning);
-            getLogger().warning("|      New Version is:                                |");
+            getLogger().warning("|      New Version is:                            |");
             getLogger().warning(newversion);
-            getLogger().warning("*-----------------------------------------------------*");
+            getLogger().warning("*-------------------------------------------------*");
             outdated = true;
         }
     }

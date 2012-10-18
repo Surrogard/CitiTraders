@@ -144,14 +144,16 @@ public class Trader implements Listener {
         NPC npc = CitizensAPI.getNPCRegistry().getNPC(event.getEntity());
         Player player = (Player) devent.getDamager();
 
-        if (!npc.hasTrait(ShopTrait.class)) {
-            return;
+        if (npc.hasTrait(TraderTrait.class)) {
+            npc.getTrait(TraderTrait.class).openInventory(player);
         }
 
-        if (!npc.getTrait(ShopTrait.class).getDisabled()) {
-            npc.getTrait(ShopTrait.class).openBuyWindow(player);
-        } else {
-            player.sendMessage(ChatColor.DARK_PURPLE + "This trader is currently disabled.");
+        if (npc.hasTrait(ShopTrait.class)) {
+            if (!npc.getTrait(ShopTrait.class).getDisabled()) {
+                npc.getTrait(ShopTrait.class).openBuyWindow(player);
+            } else {
+                player.sendMessage(ChatColor.DARK_PURPLE + CitiTrader.self.getLang().getString("shop.disabled"));
+            }
         }
     }
 
@@ -188,14 +190,14 @@ public class Trader implements Listener {
             event.setCancelled(true);
             state.setChestLocation(event.getClickedBlock().getLocation());
             state.setStatus(Status.SELECT_CHEST_NPC);
-            by.sendMessage(ChatColor.DARK_PURPLE + "Right click the NPC you want to link.");
+            by.sendMessage(ChatColor.DARK_PURPLE + CitiTrader.self.getLang().getString("shop.linkNPC"));
         }
 
         if (state.getStatus().equals(Status.SELECT_UNLINK_CHEST)) {
             event.setCancelled(true);
             state.setChestLocation(event.getClickedBlock().getLocation());
             state.setStatus(Status.SELECT_UNCHEST_NPC);
-            by.sendMessage(ChatColor.DARK_PURPLE + "Right click the NPC you want to unlink.");
+            by.sendMessage(ChatColor.DARK_PURPLE + CitiTrader.self.getLang().getString("shop.unlinkNPC"));
         }
     }
 
@@ -213,7 +215,7 @@ public class Trader implements Listener {
                 npc.getTrait(ShopTrait.class).openBuyWindow(by);
                 return;
             } else {
-                by.sendMessage(ChatColor.DARK_PURPLE + "This trader is currently disabled.");
+                by.sendMessage(ChatColor.DARK_PURPLE + CitiTrader.self.getLang().getString("shop.disabled"));
                 return;
             }
         }
@@ -228,28 +230,28 @@ public class Trader implements Listener {
                 case DISABLE: {
                     state.getTrader().getTrait(ShopTrait.class).setDisabled(true);
                     clearStatus(by.getName());
-                    by.sendMessage(ChatColor.DARK_PURPLE + "Trader " + npc.getName() + " has been disabled.");
+                    by.sendMessage(ChatColor.DARK_PURPLE + String.format(CitiTrader.self.getLang().getString("shop.disabled"), npc.getName()));
                     return;
                 }
                 case ENABLE: {
                     state.getTrader().getTrait(ShopTrait.class).setDisabled(false);
                     clearStatus(by.getName());
-                    by.sendMessage(ChatColor.DARK_PURPLE + "Trader " + npc.getName() + " has been enabled.");
+                    by.sendMessage(ChatColor.DARK_PURPLE + String.format(CitiTrader.self.getLang().getString("shop.enabled"), npc.getName()));
                     return;
                 }
                 case FIRING: {
                     if (!state.getTrader().getTrait(StockRoomTrait.class).isStockRoomEmpty()) {
-                        by.sendMessage(ChatColor.RED + "Cannot fire trader! He still has items on him!");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.cantfirestock"));
                         clearStatus(by.getName());
                         return;
                     }
                     if (state.getTrader().getTrait(WalletTrait.class).getType() == WalletType.PRIVATE && state.getTrader().getTrait(WalletTrait.class).getAmount() > 0.0D) {
-                        by.sendMessage(ChatColor.RED + "Trader still has money in their wallet!");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.cantfiremoney"));
                         clearStatus(by.getName());
                         return;
                     }
 
-                    by.sendMessage(ChatColor.DARK_RED + "Firing trader!");
+                    by.sendMessage(ChatColor.DARK_RED + CitiTrader.self.getLang().getString("shop.fired"));
                     npc.removeTrait(ShopTrait.class);
                     npc.removeTrait(WalletTrait.class);
                     npc.destroy();
@@ -258,9 +260,9 @@ public class Trader implements Listener {
                     state.getTrader().getTrait(ShopTrait.class).setSellPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
                     if (state.getMoney() == -1) {
-                        by.sendMessage(ChatColor.GREEN + "Item price removed.");
+                        by.sendMessage(ChatColor.GREEN + CitiTrader.self.getLang().getString("shop.priceremoved"));
                     } else {
-                        by.sendMessage(ChatColor.GREEN + "Sell price set.");
+                        by.sendMessage(ChatColor.GREEN + CitiTrader.self.getLang().getString("shop.priceadded"));
                     }
                     return;
                 }
@@ -269,9 +271,9 @@ public class Trader implements Listener {
                     state.getTrader().getTrait(ShopTrait.class).setBuyPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
                     if (state.getMoney() == -1) {
-                        by.sendMessage(ChatColor.GREEN + "Item price removed.");
+                        by.sendMessage(ChatColor.GREEN + CitiTrader.self.getLang().getString("shop.priceremoved"));
                     } else {
-                        by.sendMessage(ChatColor.GREEN + "Buy price set.");
+                        by.sendMessage(ChatColor.GREEN + CitiTrader.self.getLang().getString("shop.buypriceadded"));
                     }
                     return;
                 }
@@ -280,82 +282,82 @@ public class Trader implements Listener {
                     state.getTrader().getTrait(WalletTrait.class).setAccount(state.getAccName());
                     state.getTrader().getTrait(WalletTrait.class).setType(state.getWalletType());
                     state.setStatus(Status.NOT);
-                    by.sendMessage(ChatColor.GREEN + "Wallet information set");
+                    by.sendMessage(ChatColor.GREEN + CitiTrader.self.getLang().getString("wallet.infoset"));
                     return;
                 }
 
                 case GIVE_MONEY: {
                     if (state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.PRIVATE) {
-                        by.sendMessage(ChatColor.RED + "Cannot use give/take on traders who use economy backed accounts.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.econaccount"));
                         return;
                     }
                     if (!CitiTrader.economy.has(by.getName(), state.getMoney())) {
-                        by.sendMessage(ChatColor.RED + "Not enough funds.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.nsf"));
                     }
                     if (!state.getTrader().getTrait(WalletTrait.class).deposit(state.getMoney())) {
-                        by.sendMessage(ChatColor.RED + "Cannot  give trader the money.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.cantgive"));
                         return;
                     }
                     if (!CitiTrader.economy.withdrawPlayer(by.getName(), state.getMoney()).transactionSuccess()) {
-                        by.sendMessage(ChatColor.RED + "Cannot give trader the money from your wallet.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.cantgivewallet"));
                         state.getTrader().getTrait(WalletTrait.class).withdraw(state.getMoney());
                         return;
                     }
-                    by.sendMessage(ChatColor.GREEN + "Money given");
+                    by.sendMessage(ChatColor.GREEN + CitiTrader.self.getLang().getString("wallet.given"));
                     status.remove(by.getName());
                     return;
                 }
                 case TAKE_MONEY: {
 
                     if (state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.PRIVATE) {
-                        by.sendMessage(ChatColor.RED + "Cannot use give/take on traders who use economy backed accounts.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.econaccount"));
                         return;
                     }
                     WalletTrait wallet = state.getTrader().getTrait(WalletTrait.class);
 
                     if (!wallet.has(state.getMoney())) {
-                        by.sendMessage(ChatColor.RED + "Not enough funds.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.nsf"));
                         return;
                     }
                     if (!CitiTrader.economy.depositPlayer(by.getName(), state.getMoney()).transactionSuccess()) {
-                        by.sendMessage(ChatColor.RED + "Cannot take the money.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.canttake"));
                         return;
                     }
                     if (!wallet.withdraw(state.getMoney())) {
-                        by.sendMessage(ChatColor.RED + "Cannot take the money from the trader's wallet.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.canttakewallet"));
                         CitiTrader.economy.withdrawPlayer(by.getName(), state.getMoney());
                         return;
                     }
-                    by.sendMessage(ChatColor.GREEN + "Money given");
+                    by.sendMessage(ChatColor.GREEN + CitiTrader.self.getLang().getString("wallet.taken"));
                     status.remove(by.getName());
                     return;
                 }
                 case BALANCE_MONEY: {
                     WalletTrait wallet = state.getTrader().getTrait(WalletTrait.class);
 
-                    by.sendMessage(ChatColor.GOLD + "Traders balance is " + wallet.getAmount());
+                    by.sendMessage(ChatColor.GOLD + String.format(CitiTrader.self.getLang().getString("wallet.balance"), wallet.getAmount()));
                     status.remove(by.getName());
                     return;
                 }
 
                 case SET_LINK: {
                     if (!state.getTrader().getTrait(ShopTrait.class).setLinkedNPC(state.getLinkedNPCName())) {
-                        by.sendMessage(ChatColor.RED + "Trader could not be linked to " + state.getLinkedNPCName());
+                        by.sendMessage(ChatColor.RED + String.format(CitiTrader.self.getLang().getString("link.cantlink"), state.getLinkedNPCName()));
                         state.setStatus(Status.NOT);
                         return;
                     }
 
-                    by.sendMessage(ChatColor.GREEN + "Trader linked to " + state.getLinkedNPCName());
+                    by.sendMessage(ChatColor.GREEN + String.format(CitiTrader.self.getLang().getString("link.linked"), state.getLinkedNPCName()));
                     state.setStatus(Status.NOT);
                     return;
                 }
                 case REMOVE_LINK: {
                     if (!state.getTrader().getTrait(ShopTrait.class).removeLinkedNPC()) {
-                        by.sendMessage(ChatColor.RED + "Trader could not be unlinked.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("link.cantunlink"));
                         state.setStatus(Status.NOT);
                         return;
                     }
-                    by.sendMessage(ChatColor.GREEN + "Trader has been unlinked, he will use is own pricelist now.");
+                    by.sendMessage(ChatColor.GREEN + CitiTrader.self.getLang().getString("link.unlinked"));
                     state.setStatus(Status.NOT);
                     return;
                 }
@@ -363,25 +365,25 @@ public class Trader implements Listener {
                     NPC chestOwner = CitiTrader.self.isChestLinked(state.getChestLocation());
                     if (chestOwner != null) {
                         if (!chestOwner.getTrait(Owner.class).isOwnedBy(by)) {
-                            by.sendMessage(ChatColor.RED + "Chest is already linked to a different Owner.");
+                            by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.alreadylinked"));
                             state.setStatus(Status.NOT);
                             return;
                         }
                     }
                     if (!state.getTrader().getTrait(ShopTrait.class).setLinkedChest(state.getChestLocation())) {
-                        by.sendMessage(ChatColor.RED + "Chest could not be linked to Trader.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.cantlink"));
                         state.setStatus(Status.NOT);
                         return;
                     }
 
                     int chestLimit = CitiTrader.self.getChestLimit(by);
                     if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(ShopTrait.class).getLinkedChests().size() - 1) {
-                        by.sendMessage(ChatColor.RED + "You cannot Link another Chest to this NPC. (" + chestLimit + ")" + state.getTrader().getTrait(ShopTrait.class).getLinkedChests().size());
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.overlimit"));
                         state.setStatus(Status.NOT);
                         return;
                     }
 
-                    by.sendMessage(ChatColor.GREEN + "Chest has been linked to " + npc.getName());
+                    by.sendMessage(ChatColor.GREEN + String.format(CitiTrader.self.getLang().getString("chest.linked"), npc.getName()));
                     state.setStatus(Status.NOT);
                     return;
                 }
@@ -389,35 +391,35 @@ public class Trader implements Listener {
                     NPC chestOwner = CitiTrader.self.isChestLinked(state.getChestLocation());
                     if (chestOwner != null) {
                         if (!chestOwner.getTrait(Owner.class).isOwnedBy(by)) {
-                            by.sendMessage(ChatColor.RED + "You don't own the Linked NPC, you can't unlink this chest.");
+                            by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.notowned"));
                             state.setStatus(Status.NOT);
                             return;
                         }
                     }
 
                     if (!state.getTrader().getTrait(ShopTrait.class).removeLinkedChest(state.getChestLocation())) {
-                        by.sendMessage(ChatColor.RED + "Chest could not be unlinked from Trader.");
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.cantunlink"));
                         state.setStatus(Status.NOT);
                         return;
                     }
 
-                    by.sendMessage(ChatColor.GREEN + "Chest has been unlinked from " + npc.getName());
+                    by.sendMessage(ChatColor.GREEN + String.format(CitiTrader.self.getLang().getString("chest.unlinked"), npc.getName()));
                     state.setStatus(Status.NOT);
                     return;
                 }
                 case SET_SELL_STACK: {
                     if (!state.getTrader().getTrait(ShopTrait.class).setSellStack(by.getItemInHand(), state.getStackAmount())) {
-                        by.sendMessage("Something went wrong.");
+                        by.sendMessage(CitiTrader.self.getLang().getString("stack.error"));
                         return;
                     }
-                    by.sendMessage(ChatColor.GREEN + "Stack amount set.");
+                    by.sendMessage(ChatColor.GREEN + CitiTrader.self.getLang().getString("stack.stackset"));
                     status.remove(by.getName());
                     return;
                 }
 
                 case LIST_SELL_PRICE: {
                     Map<ItemStack, Double> price = state.getTrader().getTrait(ShopTrait.class).getSellPrices();
-                    by.sendMessage(ChatColor.GOLD + "---{Sell Prices}---");
+                    by.sendMessage(ChatColor.GOLD + CitiTrader.self.getLang().getString("price.sellprices"));
                     for (Entry<ItemStack, Double> item : price.entrySet()) {
                         by.sendMessage(ChatColor.YELLOW + item.getKey().getType().name() + "   " + ChatColor.GREEN + item.getValue());
                     }
@@ -426,7 +428,7 @@ public class Trader implements Listener {
                 }
                 case LIST_BUY_PRICE: {
                     Map<ItemStack, Double> price = state.getTrader().getTrait(ShopTrait.class).getBuyPrices();
-                    by.sendMessage(ChatColor.GOLD + "---{Buy Prices}---");
+                    by.sendMessage(ChatColor.GOLD + CitiTrader.self.getLang().getString("price.buyprices"));
                     for (Entry<ItemStack, Double> item : price.entrySet()) {
                         by.sendMessage(ChatColor.YELLOW + item.getKey().getType().name() + "   " + ChatColor.GREEN + item.getValue());
                     }
@@ -441,7 +443,7 @@ public class Trader implements Listener {
         if (by.getName().equalsIgnoreCase(owner) && by.getItemInHand().getType() == Material.BOOK) {
             if (npc.hasTrait(ShopTrait.class)) {
                 if (npc.getTrait(ShopTrait.class).hasLinkedChest()) {
-                    by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chests.haslinkedstock"));
+                    by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.haslinkedstock"));
                     return;
                 }
             }
