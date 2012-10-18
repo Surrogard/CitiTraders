@@ -67,7 +67,30 @@ public class Trader implements Listener {
         try {
             Metrics metrics = new Metrics(CitiTrader.self);
             Graph graph = metrics.createGraph("Traders");
-            graph.addPlotter(new Metrics.Plotter("Total Traders") {
+            graph.addPlotter(new Metrics.Plotter("VI Traders") {
+                @Override
+                public int getValue() {
+
+                    Integer totaltrader = 0;
+                    try {
+                        Iterator it = CitizensAPI.getNPCRegistry().iterator();
+                        while (it.hasNext()) {
+                            NPC npcount = (NPC) it.next();
+                            if (npcount.hasTrait(TraderTrait.class)) {
+                                totaltrader++;
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("error");
+                        e.printStackTrace();
+                    }
+                    if (CitiTrader.self.getConfig().getBoolean("debug.tradercount", false)) {
+                        CitiTrader.self.getLogger().log(Level.INFO, "Shops: {0}", totaltrader);
+                    }
+                    return totaltrader;
+                }
+            });
+            graph.addPlotter(new Metrics.Plotter("Shop Traders") {
                 @Override
                 public int getValue() {
 
@@ -85,7 +108,7 @@ public class Trader implements Listener {
                         e.printStackTrace();
                     }
                     if (CitiTrader.self.getConfig().getBoolean("debug.tradercount", false)) {
-                        CitiTrader.self.getLogger().log(Level.INFO, "Traders: {0}", totaltrader);
+                        CitiTrader.self.getLogger().log(Level.INFO, "VI Traders: {0}", totaltrader);
                     }
                     return totaltrader;
                 }
