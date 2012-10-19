@@ -48,7 +48,8 @@ public class CitiCommands implements CommandExecutor {
 
         Player player = (Player) sender;
         if (!sender.hasPermission(CitiTrader.PERM_PREFIX + ".command." + args[0])) {
-            return false;
+            sender.sendMessage(CitiTrader.self.getLang().getString("error.noperm"));
+            return true;
         }
         Subcommand subCom;
         try {

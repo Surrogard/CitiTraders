@@ -1,6 +1,7 @@
 ## YAML Template.
 error:
   noecon: No Economy Found, can't load Shop and Wallet Traits.
+  noperm: You don't have permission.
 shop:
   disabled: This shop is currently disabled.
   linkNPC: Right click the NPC you want to link.
@@ -14,6 +15,7 @@ shop:
   priceremoved: Item price removed.
   priceadded: Sell price set.
   buypriceadded: Buy price set.
+  noashop: NPC is not a shop.
 wallet:
   infoset: Wallet information set
   econaccount: Cannot use give/take on traders who use economy backed accounts.

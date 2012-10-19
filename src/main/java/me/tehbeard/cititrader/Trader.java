@@ -228,18 +228,30 @@ public class Trader implements Listener {
 
             switch (state.getStatus()) {
                 case DISABLE: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     state.getTrader().getTrait(ShopTrait.class).setDisabled(true);
                     clearStatus(by.getName());
                     by.sendMessage(ChatColor.DARK_PURPLE + String.format(CitiTrader.self.getLang().getString("shop.disabled"), npc.getName()));
                     return;
                 }
                 case ENABLE: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     state.getTrader().getTrait(ShopTrait.class).setDisabled(false);
                     clearStatus(by.getName());
                     by.sendMessage(ChatColor.DARK_PURPLE + String.format(CitiTrader.self.getLang().getString("shop.enabled"), npc.getName()));
                     return;
                 }
                 case FIRING: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     if (!state.getTrader().getTrait(StockRoomTrait.class).isStockRoomEmpty()) {
                         by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.cantfirestock"));
                         clearStatus(by.getName());
@@ -257,6 +269,10 @@ public class Trader implements Listener {
                     npc.destroy();
                 }
                 case SET_PRICE_SELL: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     state.getTrader().getTrait(ShopTrait.class).setSellPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
                     if (state.getMoney() == -1) {
@@ -268,6 +284,10 @@ public class Trader implements Listener {
                 }
 
                 case SET_PRICE_BUY: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     state.getTrader().getTrait(ShopTrait.class).setBuyPrice(by.getItemInHand(), state.getMoney());
                     state.setStatus(Status.NOT);
                     if (state.getMoney() == -1) {
@@ -279,6 +299,10 @@ public class Trader implements Listener {
                 }
 
                 case SET_WALLET: {
+                    if (!hasWallet(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.nowallet"));
+                        return;
+                    }
                     state.getTrader().getTrait(WalletTrait.class).setAccount(state.getAccName());
                     state.getTrader().getTrait(WalletTrait.class).setType(state.getWalletType());
                     state.setStatus(Status.NOT);
@@ -287,6 +311,10 @@ public class Trader implements Listener {
                 }
 
                 case GIVE_MONEY: {
+                    if (!hasWallet(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.nowallet"));
+                        return;
+                    }
                     if (state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.PRIVATE) {
                         by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.econaccount"));
                         return;
@@ -308,7 +336,10 @@ public class Trader implements Listener {
                     return;
                 }
                 case TAKE_MONEY: {
-
+                    if (!hasWallet(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.nowallet"));
+                        return;
+                    }
                     if (state.getTrader().getTrait(WalletTrait.class).getType() != WalletType.PRIVATE) {
                         by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.econaccount"));
                         return;
@@ -333,6 +364,10 @@ public class Trader implements Listener {
                     return;
                 }
                 case BALANCE_MONEY: {
+                    if (!hasWallet(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("wallet.nowallet"));
+                        return;
+                    }
                     WalletTrait wallet = state.getTrader().getTrait(WalletTrait.class);
 
                     by.sendMessage(ChatColor.GOLD + String.format(CitiTrader.self.getLang().getString("wallet.balance"), wallet.getAmount()));
@@ -341,6 +376,10 @@ public class Trader implements Listener {
                 }
 
                 case SET_LINK: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     if (!state.getTrader().getTrait(ShopTrait.class).setLinkedNPC(state.getLinkedNPCName())) {
                         by.sendMessage(ChatColor.RED + String.format(CitiTrader.self.getLang().getString("link.cantlink"), state.getLinkedNPCName()));
                         state.setStatus(Status.NOT);
@@ -352,6 +391,10 @@ public class Trader implements Listener {
                     return;
                 }
                 case REMOVE_LINK: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     if (!state.getTrader().getTrait(ShopTrait.class).removeLinkedNPC()) {
                         by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("link.cantunlink"));
                         state.setStatus(Status.NOT);
@@ -362,6 +405,10 @@ public class Trader implements Listener {
                     return;
                 }
                 case SELECT_CHEST_NPC: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     NPC chestOwner = CitiTrader.self.isChestLinked(state.getChestLocation());
                     if (chestOwner != null) {
                         if (!chestOwner.getTrait(Owner.class).isOwnedBy(by)) {
@@ -388,6 +435,10 @@ public class Trader implements Listener {
                     return;
                 }
                 case SELECT_UNCHEST_NPC: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     NPC chestOwner = CitiTrader.self.isChestLinked(state.getChestLocation());
                     if (chestOwner != null) {
                         if (!chestOwner.getTrait(Owner.class).isOwnedBy(by)) {
@@ -408,6 +459,10 @@ public class Trader implements Listener {
                     return;
                 }
                 case SET_SELL_STACK: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     if (!state.getTrader().getTrait(ShopTrait.class).setSellStack(by.getItemInHand(), state.getStackAmount())) {
                         by.sendMessage(CitiTrader.self.getLang().getString("stack.error"));
                         return;
@@ -418,6 +473,10 @@ public class Trader implements Listener {
                 }
 
                 case LIST_SELL_PRICE: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     Map<ItemStack, Double> price = state.getTrader().getTrait(ShopTrait.class).getSellPrices();
                     by.sendMessage(ChatColor.GOLD + CitiTrader.self.getLang().getString("price.sellprices"));
                     for (Entry<ItemStack, Double> item : price.entrySet()) {
@@ -427,6 +486,10 @@ public class Trader implements Listener {
                     return;
                 }
                 case LIST_BUY_PRICE: {
+                    if (!isShop(state.getTrader())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
+                        return;
+                    }
                     Map<ItemStack, Double> price = state.getTrader().getTrait(ShopTrait.class).getBuyPrices();
                     by.sendMessage(ChatColor.GOLD + CitiTrader.self.getLang().getString("price.buyprices"));
                     for (Entry<ItemStack, Double> item : price.entrySet()) {
@@ -461,6 +524,21 @@ public class Trader implements Listener {
         }
     }
 
+    public boolean isShop(NPC npc) {
+        if (npc.hasTrait(ShopTrait.class)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public boolean hasWallet(NPC npc) {
+        if (npc.hasTrait(WalletTrait.class)) {
+            return true;
+        }
+        
+        return false;
+    }
     public static void setUpNPC(NPC npc, Style style) {
         if (style.equals(Style.TRADER)) {
             if (!npc.hasTrait(ShopTrait.class)) {
