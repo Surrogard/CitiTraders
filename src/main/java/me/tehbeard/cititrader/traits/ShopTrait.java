@@ -348,8 +348,6 @@ public class ShopTrait extends Trait implements TraderInterface {
         if (price == -1) {
             if (sellPrices.containsKey(i)) {
                 sellPrices.remove(i);
-            } else {
-                System.out.println("Item not found!");
             }
             return;
         }
@@ -495,7 +493,6 @@ public class ShopTrait extends Trait implements TraderInterface {
                     break;
                 }
                 if (event.isLeftClick()) {
-                    System.out.println("AMOUNT SELECTED");
                     Player player = (Player) event.getWhoClicked();
                     sellToPlayer(player, state.getTrader(), event.getCurrentItem());
                 } else {
@@ -777,7 +774,6 @@ public class ShopTrait extends Trait implements TraderInterface {
         if (loc.getBlock().getType().equals(mat)) {
             return true;
         }
-        System.out.println("Location is not a chest.");
         return false;
     }
 
@@ -879,7 +875,7 @@ public class ShopTrait extends Trait implements TraderInterface {
                             }
                         } else {
                             // warn if owner is online, chest doesn't exist.
-                            System.out.println("Chest doesn't exist: " + loc.getKey().getBlock().getType().toString());
+                            //System.out.println("Chest doesn't exist: " + loc.getKey().getBlock().getType().toString());
                         }
                     }
                 } else {
