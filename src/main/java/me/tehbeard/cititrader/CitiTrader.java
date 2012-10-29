@@ -31,8 +31,10 @@ import net.citizensnpcs.command.exception.UnhandledCommandException;
 import net.citizensnpcs.command.exception.WrappedCommandException;
 import net.citizensnpcs.util.Messages;
 import net.citizensnpcs.util.Messaging;
+import net.citizensnpcs.util.StringHelper;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandException;
@@ -89,7 +91,7 @@ public class CitiTrader extends JavaPlugin {
         registerCommands();
 
         commands = new CitiCommands(this);
-        getCommand("trader").setExecutor(commands);
+        //getCommand("trader").setExecutor(commands);
         Bukkit.getPluginManager().registerEvents(new Trader(), this);
 
         try {
@@ -126,8 +128,8 @@ public class CitiTrader extends JavaPlugin {
             String modifier = args.length > 0 ? args[0] : "";
 
             if (!citicommands.hasCommand(split[0], modifier) && !modifier.isEmpty()) {
-                //return suggestClosestModifier(sender, split[0], modifier);
-                return true;
+                return suggestClosestModifier(sender, split[0], modifier);
+                //return true;
             }
 
             NPC npc =  ((Citizens)CitizensAPI.getPlugin()).getNPCSelector().getSelected(sender);
@@ -158,6 +160,24 @@ public class CitiTrader extends JavaPlugin {
             }
         }
         return true;
+    }
+    
+    private boolean suggestClosestModifier(CommandSender sender, String command, String modifier) {
+        int minDist = Integer.MAX_VALUE;
+        String closest = "";
+        for (String string : citicommands.getAllCommandModifiers(command)) {
+            int distance = StringHelper.getLevenshteinDistance(modifier, string);
+            if (minDist > distance) {
+                minDist = distance;
+                closest = string;
+            }
+        }
+        if (!closest.isEmpty()) {
+            sender.sendMessage(ChatColor.GRAY + Messaging.tr(Messages.UNKNOWN_COMMAND));
+            sender.sendMessage(StringHelper.wrap(" /") + command + " " + StringHelper.wrap(closest));
+            return true;
+        }
+        return false;
     }
     
     private boolean setupEconomy() {

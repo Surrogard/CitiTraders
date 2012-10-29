@@ -545,6 +545,10 @@ public class Trader implements Listener {
                 npc.addTrait(ShopTrait.class);
             }
 
+            if (!npc.hasTrait(StockRoomTrait.class)) {
+                npc.addTrait(StockRoomTrait.class);
+            }
+            
             if (!npc.hasTrait(WalletTrait.class)) {
                 npc.addTrait(WalletTrait.class);
             }
