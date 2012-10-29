@@ -12,17 +12,31 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import junit.framework.Assert;
 import me.tehbeard.cititrader.commands.CitiCommands;
+import me.tehbeard.cititrader.commands.TraderCommands;
 import me.tehbeard.cititrader.traits.ShopTrait;
 import me.tehbeard.cititrader.traits.StockRoomTrait;
 import me.tehbeard.cititrader.traits.TraderTrait;
 import me.tehbeard.cititrader.traits.WalletTrait;
+import net.citizensnpcs.Citizens;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.CitizensPlugin;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.TraitInfo;
+import net.citizensnpcs.command.CommandManager;
+import net.citizensnpcs.command.CommandManager.CommandInfo;
+import net.citizensnpcs.command.Injector;
+import net.citizensnpcs.command.exception.CommandUsageException;
+import net.citizensnpcs.command.exception.ServerCommandException;
+import net.citizensnpcs.command.exception.UnhandledCommandException;
+import net.citizensnpcs.command.exception.WrappedCommandException;
+import net.citizensnpcs.util.Messages;
+import net.citizensnpcs.util.Messaging;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandException;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -37,6 +51,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class CitiTrader extends JavaPlugin {
 
+    private final CommandManager citicommands = new CommandManager();
     public static final String PERM_PREFIX = "traders";
     public static CitiTrader self;
     public static Economy economy;
@@ -70,6 +85,9 @@ public class CitiTrader extends JavaPlugin {
         CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(StockRoomTrait.class).withName("stockroom"));
         CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(TraderTrait.class).withName("villagetrader"));
 
+
+        registerCommands();
+
         commands = new CitiCommands(this);
         getCommand("trader").setExecutor(commands);
         Bukkit.getPluginManager().registerEvents(new Trader(), this);
@@ -82,6 +100,66 @@ public class CitiTrader extends JavaPlugin {
         getLogger().log(Level.INFO, "v{0} loaded", getDescription().getVersion());
     }
 
+    public CommandInfo getCommandInfo(String rootCommand, String modifier) {
+        return citicommands.getCommand(rootCommand, modifier);
+    }
+
+    public Iterable<CommandInfo> getCommands(String base) {
+        return citicommands.getCommands(base);
+    }
+
+    private void registerCommands() {
+        citicommands.setInjector(new Injector(this));
+
+        // Register command classes
+        citicommands.register(TraderCommands.class);
+    }
+    
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String cmdName, String[] args) {
+        try {
+            // must put command into split.
+            String[] split = new String[args.length + 1];
+            System.arraycopy(args, 0, split, 1, args.length);
+            split[0] = cmd.getName().toLowerCase();
+
+            String modifier = args.length > 0 ? args[0] : "";
+
+            if (!citicommands.hasCommand(split[0], modifier) && !modifier.isEmpty()) {
+                //return suggestClosestModifier(sender, split[0], modifier);
+                return true;
+            }
+
+            NPC npc =  ((Citizens)CitizensAPI.getPlugin()).getNPCSelector().getSelected(sender);
+            // TODO: change the args supplied to a context style system for
+            // flexibility (ie. adding more context in the future without
+            // changing everything)
+            try {
+                citicommands.execute(split, sender, sender, npc);
+            } catch (ServerCommandException ex) {
+                Messaging.sendTr(sender, Messages.COMMAND_MUST_BE_INGAME);
+            } catch (CommandUsageException ex) {
+                Messaging.sendError(sender, ex.getMessage());
+                Messaging.sendError(sender, ex.getUsage());
+            } catch (WrappedCommandException ex) {
+                throw ex.getCause();
+            } catch (UnhandledCommandException ex) {
+                return false;
+            } catch (CommandException ex) {
+                Messaging.sendError(sender, ex.getMessage());
+            }
+        } catch (NumberFormatException ex) {
+            Messaging.sendErrorTr(sender, Messages.COMMAND_INVALID_NUMBER);
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+            if (sender instanceof Player) {
+                Messaging.sendErrorTr(sender, Messages.COMMAND_REPORT_ERROR);
+                Messaging.sendError(sender, ex.getClass().getName() + ": " + ex.getMessage());
+            }
+        }
+        return true;
+    }
+    
     private boolean setupEconomy() {
         RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
         if (economyProvider != null) {

@@ -10,7 +10,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bukkit.version>1.3.2-R2.1-SNAPSHOT</bukkit.version>
-        <citizensapi.version>2.0.2</citizensapi.version>
+        <citizensapi.version>2.0.3-SNAPSHOT</citizensapi.version>
         <vault.version>1.2.20-SNAPSHOT</vault.version>
     </properties>
 
@@ -49,6 +49,13 @@
         <dependency>
             <groupId>net.citizensnpcs</groupId>
             <artifactId>citizensapi</artifactId>
+            <version>${citizensapi.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.citizensnpcs</groupId>
+            <artifactId>citizens</artifactId>
             <version>${citizensapi.version}</version>
             <type>jar</type>
             <scope>compile</scope>

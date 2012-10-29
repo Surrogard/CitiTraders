@@ -4,18 +4,21 @@ version: BETA-2.0
 depend: [Citizens,Vault]
 softdepend: [Towny]
 commands:
-    trader:
-        aliases: ctrader
-        description: CitiTrader commands 
-        usage: |
-          /<command> create name -type [TYPE] - Create a trader at the players current location
-          /<command> fire - fire an npc
-          /<command> setwallet [private|owner|bank|admin] accountname - set wallet type
-          /<command> wallet [give|take] amount  - place/remove money from a private wallet
-          /<command> sellprice price - Set selling price for item currently in hand, right click npc to set price for them.
-          /<command> buyprice price - Set buying price for item currently in hand, right click npc to set price for them.
-          /<command> cancel - Cancels all traders status with player
-          /<command> reloadprofiles - reload all profiles
+  tradertest:
+    description: nothing.
+    usage: Nothing
+  trader:
+    aliases: ctrader
+    description: CitiTrader commands 
+    usage: |
+      /<command> create name -type [TYPE] - Create a trader at the players current location
+      /<command> fire - fire an npc
+      /<command> setwallet [private|owner|bank|admin] accountname - set wallet type
+      /<command> wallet [give|take] amount  - place/remove money from a private wallet
+      /<command> sellprice price - Set selling price for item currently in hand, right click npc to set price for them.
+      /<command> buyprice price - Set buying price for item currently in hand, right click npc to set price for them.
+      /<command> cancel - Cancels all traders status with player
+      /<command> reloadprofiles - reload all profiles
 permissions:
   traders.command.*:
     description: Grants access to all trader commands
