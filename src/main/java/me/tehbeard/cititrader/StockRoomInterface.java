@@ -16,9 +16,21 @@ public interface StockRoomInterface {
      * Does the trader have this stock.
      * @param locate
      * @param checkAmount
-     * @return
+     * @return boolean
      */
     public boolean hasStock(ItemStack locate,boolean checkAmount);
+    
+    /**
+     * Removes an item from the Traders stock.
+     * @param is
+     */
+    public boolean removeItem(ItemStack is);
+    
+    /**
+     * Adds an item to the Traders stock.
+     * @param is
+     */
+    public boolean addItem(ItemStack is);
     
     /**
      * Opens the stock room inventory to 
@@ -30,4 +42,16 @@ public interface StockRoomInterface {
      * Returns is the StockRoom is Empty.
      */
     public boolean isStockRoomEmpty();
+    
+    /**
+     * Returns if stock if static.
+     * @return boolean isStatic
+     */
+    public boolean isStatic();
+    
+    /**
+     * Sets the isStatic value.
+     * @param isStatic
+     */
+    public void setStatic(boolean isStatic);
 }

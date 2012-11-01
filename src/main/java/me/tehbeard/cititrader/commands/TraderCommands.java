@@ -108,7 +108,6 @@ public class TraderCommands {
             npc.getTrait(Owner.class).setOwner(sender.getName());
         }
         npc.getTrait(MobType.class).setType(type);
-
         Location spawnLoc = null;
         if (sender instanceof Player) {
             spawnLoc = ((Player) sender).getLocation();
@@ -418,7 +417,7 @@ public class TraderCommands {
     }
 
     @Command(aliases = {"trader"},
-    desc = "Links a Chest to an NPC",
+    desc = "Lists the Buy/Sell options of an NPC.",
     usage = "list (buy|sell)",
     modifiers = {"list"},
     min = 2,
@@ -438,5 +437,31 @@ public class TraderCommands {
             status.setStatus(TraderStatus.Status.LIST_SELL_PRICE);
         }
 
+    }
+    
+    @Command(aliases = {"trader"},
+    desc = "Sets options for inventory.",
+    usage = "setinv -i (toggle infinite Inventory) or -s # (multiple of 9) sets the Size of the traders inventory.",
+    modifiers = {"setinv"},
+    flags = "is",
+    min = 2,
+    max = 3,
+    permission = "trader.commands.setinv")
+    public void doSetInv(CommandContext args, CommandSender sender, NPC npc) {
+        TraderStatus status = Trader.getStatus(sender.getName());
+        if (args.hasFlag('i')) {
+            if (sender.hasPermission("trader.commands.setinv.infinite")) {
+                Messaging.send(sender, "Right Click Trader to set infinite (static) inventory.");
+                status.setStatus(TraderStatus.Status.SET_INFINITE);
+                return;
+            } else {
+                Messaging.send(sender, "You don't have permission to set infinite Inventory.");
+                return;
+            }
+        }
+        
+        if (args.hasFlag('s')) {
+            
+        }
     }
 }

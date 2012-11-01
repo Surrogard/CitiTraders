@@ -19,6 +19,7 @@ import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Owner;
+import net.citizensnpcs.util.Messaging;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -495,6 +496,23 @@ public class Trader implements Listener {
                     for (Entry<ItemStack, Double> item : price.entrySet()) {
                         by.sendMessage(ChatColor.YELLOW + item.getKey().getType().name() + "   " + ChatColor.GREEN + item.getValue());
                     }
+                    status.remove(by.getName());
+                    return;
+                }
+                case SET_INFINITE: {
+                    if(npc.hasTrait(StockRoomTrait.class)) {
+                        StockRoomTrait trait = npc.getTrait(StockRoomTrait.class);
+                        if (trait.isStatic()) {
+                            Messaging.send(by, "Traders StockRoom will change with buy/sell");
+                            trait.setStatic(false);
+                        } else {
+                            Messaging.send(by, "Traders StockRoom will no longer change.");
+                            trait.setStatic(true);
+                        }
+                    } else {
+                        // send error message
+                    }
+                    
                     status.remove(by.getName());
                     return;
                 }

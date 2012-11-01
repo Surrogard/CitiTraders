@@ -31,7 +31,8 @@ public class TraderStatus {
         SET_SELL_STACK,
         SET_BUY_STACK,
         LIST_SELL_PRICE,
-        LIST_BUY_PRICE
+        LIST_BUY_PRICE,
+        SET_INFINITE;
     }
     private NPC trader;
     private Status status = Status.NOT;

@@ -23,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomInterface {
 
     private Inventory stock;
+    private boolean isStatic;
 
     public StockRoomTrait() {
         this(54);
@@ -58,6 +59,9 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
         for (DataKey slotKey : data.getRelative("inv").getIntegerSubKeys()) {
             stock.setItem(Integer.parseInt(slotKey.name()), ItemStorage.loadItemStack(slotKey));
         }
+        
+        //Load if Stock is static (or infinite)
+        isStatic = data.getBoolean("static");
     }
 
     @Override
@@ -71,6 +75,8 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
                 ItemStorage.saveItem(inv.getRelative("" + i++), is);
             }
         }
+        
+        data.setBoolean("static", isStatic);
     }
 
     public Inventory getInventory() {
@@ -108,5 +114,37 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
             }
         }
         return true;
+    }
+
+    public boolean removeItem(ItemStack is) {
+        if (!isStatic) {
+            stock.removeItem(is);
+        }
+        
+        if (is.getAmount() > 0) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public boolean addItem(ItemStack is) {
+        if (!isStatic) {
+            stock.addItem(is);
+        }
+        
+        if (is.getAmount() > 0) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public boolean isStatic() {
+        return isStatic;
+    }
+    
+    public void setStatic(boolean value) {
+        this.isStatic = value;
     }
 }
