@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import junit.framework.Assert;
 import me.tehbeard.cititrader.commands.CitiCommands;
 import me.tehbeard.cititrader.commands.TraderCommands;
+import me.tehbeard.cititrader.traits.LinkedChestTrait;
 import me.tehbeard.cititrader.traits.ShopTrait;
 import me.tehbeard.cititrader.traits.StockRoomTrait;
 import me.tehbeard.cititrader.traits.TraderTrait;
@@ -84,6 +85,7 @@ public class CitiTrader extends JavaPlugin {
             getLogger().severe(getLang().getString("error.noecon"));
         }
 
+        CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(LinkedChestTrait.class).withName("linkedchest"));
         CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(StockRoomTrait.class).withName("stockroom"));
         CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(TraderTrait.class).withName("villagetrader"));
 
@@ -242,9 +244,10 @@ public class CitiTrader extends JavaPlugin {
 
     public NPC isChestLinked(Location loc) {
         for (NPC npc : citizens.getNPCRegistry()) {
-            if (npc.hasTrait(ShopTrait.class)) {
-                if (npc.getTrait(ShopTrait.class).hasLinkedChest()) {
-                    if (npc.getTrait(ShopTrait.class).getLinkedChests().containsKey(loc)) {
+            if (npc.hasTrait(LinkedChestTrait.class)) {
+            //if (npc.hasTrait(ShopTrait.class)) {
+                if (npc.getTrait(LinkedChestTrait.class).hasLinkedChest()) {
+                    if (npc.getTrait(LinkedChestTrait.class).getLinkedChests().containsKey(loc)) {
                         return npc;
                     }
                 }

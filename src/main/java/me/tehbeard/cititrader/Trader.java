@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import me.tehbeard.cititrader.CitiTrader.Style;
 import me.tehbeard.cititrader.TraderStatus.Status;
+import me.tehbeard.cititrader.traits.LinkedChestTrait;
 import me.tehbeard.cititrader.traits.TraderTrait;
 import me.tehbeard.cititrader.traits.WalletTrait.WalletType;
 import net.citizensnpcs.api.CitizensAPI;
@@ -418,14 +419,14 @@ public class Trader implements Listener {
                             return;
                         }
                     }
-                    if (!state.getTrader().getTrait(ShopTrait.class).setLinkedChest(state.getChestLocation())) {
+                    if (!state.getTrader().getTrait(LinkedChestTrait.class).setLinkedChest(state.getChestLocation())) {
                         by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.cantlink"));
                         state.setStatus(Status.NOT);
                         return;
                     }
 
                     int chestLimit = CitiTrader.self.getChestLimit(by);
-                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(ShopTrait.class).getLinkedChests().size() - 1) {
+                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(LinkedChestTrait.class).getLinkedChests().size() - 1) {
                         by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.overlimit"));
                         state.setStatus(Status.NOT);
                         return;
@@ -449,7 +450,7 @@ public class Trader implements Listener {
                         }
                     }
 
-                    if (!state.getTrader().getTrait(ShopTrait.class).removeLinkedChest(state.getChestLocation())) {
+                    if (!state.getTrader().getTrait(LinkedChestTrait.class).removeLinkedChest(state.getChestLocation())) {
                         by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.cantunlink"));
                         state.setStatus(Status.NOT);
                         return;
@@ -522,11 +523,11 @@ public class Trader implements Listener {
 
 
         if (by.getName().equalsIgnoreCase(owner) && by.getItemInHand().getType() == Material.BOOK) {
-            if (npc.hasTrait(ShopTrait.class)) {
-                if (npc.getTrait(ShopTrait.class).hasLinkedChest()) {
+            if (npc.hasTrait(LinkedChestTrait.class)) {
+                //if (npc.getTrait(LinkedChestTrait.class).hasLinkedChest()) {
                     by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.haslinkedstock"));
                     return;
-                }
+                //}
             }
             npc.getTrait(StockRoomTrait.class).openStockRoom(by);
         } else {
