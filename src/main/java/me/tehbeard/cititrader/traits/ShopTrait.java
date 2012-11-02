@@ -541,7 +541,7 @@ public class ShopTrait extends Trait implements TraderInterface {
 
             // Rewrite of checking stock
             // Does the NPC have the items? if so remove them.
-            if (npc.hasTrait(LinkedChestTrait.class)) {
+            if (npc.hasTrait(LinkedChestTrait.class) && !wallet.getType().equals(WalletType.ADMIN)) {
                 LinkedChestTrait linkedchest = npc.getTrait(LinkedChestTrait.class);
                 if (linkedchest.hasLinkedChest()) {
                     linkedchest.removeItem(is);
@@ -550,7 +550,7 @@ public class ShopTrait extends Trait implements TraderInterface {
                     return;
                     //transaction = false;
                 }
-            } else if (npc.hasTrait(StockRoomTrait.class)) {
+            } else if (npc.hasTrait(StockRoomTrait.class) && !wallet.getType().equals(WalletType.ADMIN)) {
                 if (!npc.getTrait(StockRoomTrait.class).removeItem(is)) {
                     Messaging.sendError(player, "Error removing items, contact admin.");
                     return;
@@ -783,7 +783,7 @@ public class ShopTrait extends Trait implements TraderInterface {
                 state.getInventory().setItem(45, new ItemStack(Material.ARROW, 1));
                 state.setStatus(Status.AMOUNT_SELECT);
             }
-        });
+        }, 2l);
 
         //System.out.println("ITEM SELECTED");
     }

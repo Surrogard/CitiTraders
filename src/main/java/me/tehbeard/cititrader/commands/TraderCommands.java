@@ -158,6 +158,10 @@ public class TraderCommands {
         if (args.hasFlag('r')) {
             price = -1;
         } else {
+            if (args.argsLength() < 2) {
+                Messaging.sendError(sender, "Not enough arguments.");
+                return;
+            }
             price = args.getDouble(1);
         }
 

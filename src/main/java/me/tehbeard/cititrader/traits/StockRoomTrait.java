@@ -122,9 +122,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
     }
 
     public boolean removeItem(ItemStack is) {
-            stock.removeItem(is);
-        
-        if (is.getAmount() > 0) {
+        if (!stock.removeItem(is).isEmpty()) {
             return false;
         }
         
