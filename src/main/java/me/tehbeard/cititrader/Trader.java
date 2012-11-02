@@ -415,18 +415,6 @@ public class Trader implements Listener {
                             return;
                         }
                     }
-                    if (!state.getTrader().getTrait(LinkedChestTrait.class).setLinkedChest(state.getChestLocation())) {
-                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.cantlink"));
-                        state.setStatus(Status.NOT);
-                        return;
-                    }
-
-                    int chestLimit = CitiTrader.self.getChestLimit(by);
-                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(LinkedChestTrait.class).getLinkedChests().size() - 1) {
-                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.overlimit"));
-                        state.setStatus(Status.NOT);
-                        return;
-                    }
 
                     // If Trader doesn't have LinkedChestTrait then attempt to convert him
                     if (!npc.hasTrait(LinkedChestTrait.class)) {
@@ -441,6 +429,19 @@ public class Trader implements Listener {
                         
                         npc.addTrait(LinkedChestTrait.class);
                         Messaging.send(by, CitiTrader.self.getLang().getString("chest.linkchesttraitadded"));
+                    }
+                    
+                    if (!state.getTrader().getTrait(LinkedChestTrait.class).setLinkedChest(state.getChestLocation())) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.cantlink"));
+                        state.setStatus(Status.NOT);
+                        return;
+                    }
+
+                    int chestLimit = CitiTrader.self.getChestLimit(by);
+                    if (chestLimit != -1 && chestLimit <= state.getTrader().getTrait(LinkedChestTrait.class).getLinkedChests().size() - 1) {
+                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("chest.overlimit"));
+                        state.setStatus(Status.NOT);
+                        return;
                     }
                     
                     by.sendMessage(ChatColor.GREEN + String.format(CitiTrader.self.getLang().getString("chest.linked"), npc.getName()));

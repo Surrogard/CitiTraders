@@ -16,6 +16,7 @@ shop:
   priceadded: Sell price set.
   buypriceadded: Buy price set.
   noashop: NPC is not a shop.
+  buynospace: Trader does not have enough space to hold something you sold him.
 wallet:
   infoset: Wallet information set
   econaccount: Cannot use give/take on traders who use economy backed accounts.

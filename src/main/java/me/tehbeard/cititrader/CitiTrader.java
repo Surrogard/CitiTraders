@@ -243,7 +243,7 @@ public class CitiTrader extends JavaPlugin {
     }
 
     public NPC isChestLinked(Location loc) {
-        for (NPC npc : citizens.getNPCRegistry()) {
+        for (NPC npc : CitizensAPI.getNPCRegistry()) {
             if (npc.hasTrait(LinkedChestTrait.class)) {
             //if (npc.hasTrait(ShopTrait.class)) {
                 if (npc.getTrait(LinkedChestTrait.class).hasLinkedChest()) {

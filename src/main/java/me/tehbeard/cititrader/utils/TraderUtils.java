@@ -35,7 +35,14 @@ public class TraderUtils {
         //Inventory chkr = Bukkit.createInventory(null, 9 * 4);
         Inventory chkr = Bukkit.createInventory(null, inventory.getSize());
 
-        for (ItemStack item : inventory.getContents()) {
+        for (int i = 0; i < chkr.getSize(); i++) {
+            if (inventory.getItem(i) != null) {
+                ItemStack item = inventory.getItem(i).clone();
+                chkr.setItem(i, item);
+            }
+        }
+        
+        /*for (ItemStack item : inventory.getContents()) {
             try {
                 if (item != null) {
                     ItemStack newItem = item.clone();
@@ -43,7 +50,7 @@ public class TraderUtils {
                 }
             } catch (Exception e) {
             }
-        }
+        }*/
         //chkr.setContents(playerInv.getContents());
         if (chkr.addItem(is.clone()).size() > 0) {
             return false;

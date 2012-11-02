@@ -493,12 +493,12 @@ public class ShopTrait extends Trait implements TraderInterface {
     private void sellToPlayer(Player player, NPC npc, final ItemStack isold) {
         //TODO: If admin shop, do not deduct items.
         ShopTrait store = npc.getTrait(ShopTrait.class);
-        StockRoomTrait stock = npc.getTrait(StockRoomTrait.class);
+        //StockRoomTrait stock = npc.getTrait(StockRoomTrait.class);
         TraderStatus state = Trader.getStatus(player.getName());
-        Material material = isold.getType();
+        //Material material = isold.getType();
         ItemStack is = isold.clone();
 
-        if (store.hasStock(is, true)) {
+        if (!store.hasStock(is, true)) {
             player.sendMessage(ChatColor.RED + "Not enough items to purchase");
             return;
         }
@@ -516,7 +516,7 @@ public class ShopTrait extends Trait implements TraderInterface {
          }
          }*/
         //chkr.setContents(playerInv.getContents());
-        if (TraderUtils.hasInventorySpace(playerInv, is)) {
+        if (!TraderUtils.hasInventorySpace(playerInv, is)) {
             player.sendMessage(ChatColor.RED + "You do not have enough space to purchase that item");
         } else {
             //check econ
@@ -693,25 +693,17 @@ public class ShopTrait extends Trait implements TraderInterface {
                 //check space
 
                 if (npc.hasTrait(LinkedChestTrait.class)) {
-                    npc.getTrait(LinkedChestTrait.class).addItem(is);
-                    /*for (Entry<Location, String> loc : state.getTrader().getTrait(ShopTrait.class).linkedChests.entrySet()) {
-                        if (locationIsBlock(loc.getKey(), Material.CHEST)) {
-                            if (!chestToFar(loc.getKey(), ((Player) event.getPlayer()))) {
-                                Inventory blockInv = ((Chest) loc.getKey().getBlock().getState()).getBlockInventory();
-
-                                if (checkSpace(blockInv, is.clone())) {
-                                    targetInv = blockInv;
-                                    break;
-                                }
-                            }
-                        }
-                    }*/
-                } else {
-                    if (TraderUtils.hasInventorySpace(npc.getTrait(StockRoomTrait.class).getInventory(), is)) {
-                    //if (!checkSpace(state.getTrader().getTrait(StockRoomTrait.class).getInventory(), is)) {
-                        ((CommandSender) event.getPlayer()).sendMessage(ChatColor.RED + "Trader does not have enough space to hold something you sold him.");
+                    if (npc.getTrait(LinkedChestTrait.class).hasSpace(is)) {
+                        npc.getTrait(LinkedChestTrait.class).addItem(is);
                     } else {
-                        //targetInv = state.getTrader().getTrait(StockRoomTrait.class).getInventory();
+                        Messaging.sendError((CommandSender)event.getPlayer(), CitiTrader.self.getLang().getString("shop.buynospace"));
+                        continue;
+                    }
+                } else {
+                    if (!TraderUtils.hasInventorySpace(npc.getTrait(StockRoomTrait.class).getInventory(), is)) {
+                        Messaging.sendError((CommandSender)event.getPlayer(), CitiTrader.self.getLang().getString("shop.buynospace"));
+                        continue;
+                    } else {
                         npc.getTrait(StockRoomTrait.class).addItem(is);
                     }
                 }
@@ -743,45 +735,6 @@ public class ShopTrait extends Trait implements TraderInterface {
 
     }
 
-    /**
-     *
-     * @param loc
-     * @param player
-     * @return
-     */
-    /*public boolean chestToFar(Location loc, Player player) {
-        if (loc.distance(npc.getBukkitEntity().getLocation()) < 10) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /*public boolean locationIsBlock(Location loc, Material mat) {
-        if (loc.getBlock().getType().equals(mat)) {
-            return true;
-        }
-        return false;
-    }
-
-    /*public boolean checkSpace(Inventory inv, ItemStack item) {
-        Inventory chkr = Bukkit.createInventory(null, inv.getSize());
-        //chkr.setContents(inv.getContents().clone());
-        ItemStack chkitem = null;
-        for (ItemStack is : inv.getContents()) {
-            if (is != null) {
-                chkitem = is.clone();
-                chkr.addItem(chkitem);
-            }
-        }
-
-        if (chkr.addItem(item).size() > 0) {
-            return false;
-        }
-
-        return true;
-    }*/
-
     public void buildSellWindow(final ItemStack item, final TraderStatus state) {
         CitiTrader.self.getServer().getScheduler().scheduleAsyncDelayedTask(CitiTrader.self, new Runnable() {
             @Override
@@ -796,7 +749,7 @@ public class ShopTrait extends Trait implements TraderInterface {
                 int k = 0;
                 ItemStack newIs = is.clone();
                 int in = 1;
-                System.out.println(newIs.toString());
+                //System.out.println(newIs.toString());
                 newIs.setAmount(1);
                 if (stackSizes.containsKey(newIs)) {
 

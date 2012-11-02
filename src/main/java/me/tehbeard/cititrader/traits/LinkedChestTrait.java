@@ -6,6 +6,7 @@ package me.tehbeard.cititrader.traits;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import me.tehbeard.cititrader.CitiTrader;
 import me.tehbeard.cititrader.LinkedChestInterface;
 import net.citizensnpcs.api.trait.Trait;
@@ -104,7 +105,7 @@ public class LinkedChestTrait extends Trait implements LinkedChestInterface {
         for (Map.Entry<Location, String> loc : linkedChests.entrySet()) {
             if (loc.getKey().getBlock().getType().equals(Material.CHEST)) {
                 if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
-                    ((Chest) loc.getKey().getBlock()).getBlockInventory().remove(removeitem);
+                    ((Chest) loc.getKey().getBlock().getState()).getBlockInventory().remove(removeitem);
                 } else {
                     // warn own that chest is to far away.
                 }
@@ -124,7 +125,7 @@ public class LinkedChestTrait extends Trait implements LinkedChestInterface {
         for (Map.Entry<Location, String> loc : linkedChests.entrySet()) {
             if (loc.getKey().getBlock().getType().equals(Material.CHEST)) {
                 if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
-                    ((Chest) loc.getKey().getBlock()).getBlockInventory().addItem(iss);
+                    ((Chest) loc.getKey().getBlock().getState()).getBlockInventory().addItem(iss);
                 }
             }
         }
@@ -171,20 +172,34 @@ public class LinkedChestTrait extends Trait implements LinkedChestInterface {
         for (Map.Entry<Location, String> loc : linkedChests.entrySet()) {
             if (loc.getKey().getBlock().getType().equals(Material.CHEST)) {
                 if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
-                    Inventory chchest = Bukkit.createInventory(null, ((Chest) loc.getKey().getBlock()).getBlockInventory().getSize());
-                    for (ItemStack item : ((Chest) loc.getKey().getBlock()).getBlockInventory()) {
+                    Inventory chchest = Bukkit.createInventory(null, ((Chest) loc.getKey().getBlock().getState()).getBlockInventory().getSize());
+                    /*for (ItemStack item : ((Chest) loc.getKey().getBlock().getState()).getBlockInventory()) {
                         chchest.addItem(item);
+                    }*/
+                    for (int i = 0; i < chchest.getSize(); i++) {
+                        if (((Chest) loc.getKey().getBlock().getState()).getBlockInventory().getItem(i) != null) {
+                            ItemStack item = ((Chest) loc.getKey().getBlock().getState()).getBlockInventory().getItem(i).clone();
+                            chchest.setItem(i, item);
+                        }
                     }
-                    System.out.println(is.getAmount());
-                    chchest.addItem(is);
+                    HashMap<Integer, ItemStack> returnItems = chchest.addItem(is);
+                    if (!returnItems.isEmpty()) {
+                        is = returnItems.get(0);
+                        /*for (Entry<Integer, ItemStack> item : returnItems.entrySet()) {
+                            System.out.println("Integer: " + item.getKey() + " ItemStack: " + item.getValue().toString());
+                        }*/
+                    } else {
+                        is.setAmount(0);
+                        break;
+                    }
                 }
             }
         }
 
         if (is.getAmount() > 0) {
-            return true;
+            return false;
         }
-        
-        return false;
+
+        return true;
     }
 }
