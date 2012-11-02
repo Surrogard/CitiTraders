@@ -44,14 +44,9 @@ public interface StockRoomInterface {
     public boolean isStockRoomEmpty();
     
     /**
-     * Returns if stock if static.
-     * @return boolean isStatic
+     * Checks if there is space in the Inventory or this item.
+     * @param is
+     * @return 
      */
-    public boolean isStatic();
-    
-    /**
-     * Sets the isStatic value.
-     * @param isStatic
-     */
-    public void setStatic(boolean isStatic);
+    public boolean hasSpace(ItemStack is);
 }

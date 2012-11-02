@@ -34,21 +34,11 @@ public interface LinkedChestInterface {
     public boolean addItem(ItemStack is);
     
     /**
-     * Returns is the StockRoom is Empty.
+     * Checks if there is space in the Inventory or this item.
+     * @param is
+     * @return 
      */
-    public boolean isStockRoomEmpty();
-    
-    /**
-     * Returns if stock if static.
-     * @return boolean isStatic
-     */
-    public boolean isStatic();
-    
-    /**
-     * Sets the isStatic value.
-     * @param isStatic
-     */
-    public void setStatic(boolean isStatic);
+    public boolean hasSpace(ItemStack is);
     
     /**
      * Adds a Chest to the Linked Chest List.

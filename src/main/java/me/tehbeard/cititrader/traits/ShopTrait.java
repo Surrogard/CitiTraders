@@ -35,13 +35,14 @@ import org.bukkit.inventory.ItemStack;
 
 public class ShopTrait extends Trait implements TraderInterface {
 
-    Map<ItemStack, Double> sellPrices;
-    Map<ItemStack, Double> buyPrices;
+    private Map<ItemStack, Double> sellPrices;
+    private Map<ItemStack, Double> buyPrices;
     //Map<Location, String> linkedChests;
-    Map<ItemStack, Integer> stackSizes;
-    Map<ItemStack, Integer> buyStackSizes;
-    boolean disabled;
-    int linkedNPCID;
+    private Map<ItemStack, Integer> stackSizes;
+    private Map<ItemStack, Integer> buyStackSizes;
+    private boolean disabled;
+    private int linkedNPCID;
+    private boolean isStatic;
 
     public ShopTrait() {
         super("shop");
@@ -52,6 +53,7 @@ public class ShopTrait extends Trait implements TraderInterface {
         buyStackSizes = new HashMap<ItemStack, Integer>();
         disabled = false;
         linkedNPCID = -1;
+        isStatic = false;
     }
 
     @Override
@@ -96,6 +98,9 @@ public class ShopTrait extends Trait implements TraderInterface {
         //load if Trader is linked to another NPC
         linkedNPCID = data.getInt("linkedNPCID", -1);
 
+        //Load if Stock is static (or infinite)
+        isStatic = data.getBoolean("static");
+        
         //load the linked Chests
         /*for (DataKey chestKey : data.getRelative("chests").getIntegerSubKeys()) {
          int x = chestKey.getRelative("location").getInt("X");
@@ -147,7 +152,8 @@ public class ShopTrait extends Trait implements TraderInterface {
                 buyPriceIndex.getRelative("" + i++).setDouble("price", price.getValue());
             }
         }
-
+        
+        data.setBoolean("static", isStatic);
         /*//Save Linked chests
          data.removeKey("chests");
          DataKey chestsKey = data.getRelative("chests");
@@ -346,6 +352,14 @@ public class ShopTrait extends Trait implements TraderInterface {
         buyPrices.put(i, price);
     }
 
+    public boolean isStatic() {
+        return isStatic;
+    }
+    
+    public void setStatic(boolean value) {
+        this.isStatic = value;
+    }
+    
     public void openSalesWindow(Player player) {
         TraderStatus state = Trader.getStatus(player.getName());
 

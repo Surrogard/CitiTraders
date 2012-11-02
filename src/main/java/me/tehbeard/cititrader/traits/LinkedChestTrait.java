@@ -10,10 +10,12 @@ import me.tehbeard.cititrader.CitiTrader;
 import me.tehbeard.cititrader.LinkedChestInterface;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.util.DataKey;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Chest;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -111,29 +113,25 @@ public class LinkedChestTrait extends Trait implements LinkedChestInterface {
                 System.out.println("Chest doesn't exist: " + loc.getKey().getBlock().getType().toString());
             }
         }
-        
+
         if (removeitem.getAmount() > 0) {
             return false;
         }
         return true;
     }
 
-    public boolean addItem(ItemStack is) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public boolean addItem(ItemStack iss) {
+        for (Map.Entry<Location, String> loc : linkedChests.entrySet()) {
+            if (loc.getKey().getBlock().getType().equals(Material.CHEST)) {
+                if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
+                    ((Chest) loc.getKey().getBlock()).getBlockInventory().addItem(iss);
+                }
+            }
+        }
+
+        return true;
     }
 
-    public boolean isStockRoomEmpty() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean isStatic() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setStatic(boolean isStatic) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
     public boolean setLinkedChest(Location loc, String catagory) {
         if (loc.getBlock().getType().equals(Material.CHEST)) {
             linkedChests.put(loc, catagory);
@@ -142,11 +140,11 @@ public class LinkedChestTrait extends Trait implements LinkedChestInterface {
 
         return false;
     }
-    
+
     public boolean setLinkedChest(Location loc) {
         return setLinkedChest(loc, "default");
     }
-    
+
     public boolean removeLinkedChest(Location loc) {
         if (linkedChests.containsKey(loc)) {
             linkedChests.remove(loc);
@@ -155,15 +153,38 @@ public class LinkedChestTrait extends Trait implements LinkedChestInterface {
 
         return false;
     }
-    
+
     public Map<Location, String> getLinkedChests() {
         return linkedChests;
     }
-    
+
     public boolean hasLinkedChest() {
         if (linkedChests.size() > 0) {
             return true;
         }
+        return false;
+    }
+
+    public boolean hasSpace(ItemStack iss) {
+        ItemStack is = iss.clone();
+
+        for (Map.Entry<Location, String> loc : linkedChests.entrySet()) {
+            if (loc.getKey().getBlock().getType().equals(Material.CHEST)) {
+                if (loc.getKey().distance(npc.getBukkitEntity().getLocation()) < 10) {
+                    Inventory chchest = Bukkit.createInventory(null, ((Chest) loc.getKey().getBlock()).getBlockInventory().getSize());
+                    for (ItemStack item : ((Chest) loc.getKey().getBlock()).getBlockInventory()) {
+                        chchest.addItem(item);
+                    }
+                    System.out.println(is.getAmount());
+                    chchest.addItem(is);
+                }
+            }
+        }
+
+        if (is.getAmount() > 0) {
+            return true;
+        }
+        
         return false;
     }
 }

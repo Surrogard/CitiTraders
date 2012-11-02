@@ -23,7 +23,6 @@ import org.bukkit.inventory.ItemStack;
 public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomInterface {
 
     private Inventory stock;
-    private boolean isStatic;
 
     public StockRoomTrait() {
         this(54);
@@ -42,11 +41,13 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
     public void load(DataKey data) throws NPCLoadException {
         
         // First Tries at Conversion
-        if (data.keyExists("prices") || data.keyExists("buyprices") || data.keyExists("disabled") || data.keyExists("linkedNPCID") || data.keyExists("chests")) {
+        if (data.keyExists("prices") || data.keyExists("buyprices") || data.keyExists("disabled") || data.keyExists("linkedNPCID")) {
             if (!npc.hasTrait(ShopTrait.class)) {
                 npc.addTrait(ShopTrait.class);
                 npc.getTrait(ShopTrait.class).load(data);
             }
+            
+            
             
             data.removeKey("prices");
             data.removeKey("buyprices");
@@ -55,13 +56,19 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
             data.removeKey("chests");
         }
         
+        if (data.keyExists("chests")) {
+        if (!npc.hasTrait(LinkedChestTrait.class)) {
+                npc.addTrait(LinkedChestTrait.class);
+                npc.getTrait(LinkedChestTrait.class).load(data);
+                npc.removeTrait(StockRoomTrait.class);
+                return;
+            }
+        }
+        
         //Load the inventory
         for (DataKey slotKey : data.getRelative("inv").getIntegerSubKeys()) {
             stock.setItem(Integer.parseInt(slotKey.name()), ItemStorage.loadItemStack(slotKey));
         }
-        
-        //Load if Stock is static (or infinite)
-        isStatic = data.getBoolean("static");
     }
 
     @Override
@@ -75,8 +82,6 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
                 ItemStorage.saveItem(inv.getRelative("" + i++), is);
             }
         }
-        
-        data.setBoolean("static", isStatic);
     }
 
     public Inventory getInventory() {
@@ -117,9 +122,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
     }
 
     public boolean removeItem(ItemStack is) {
-        if (!isStatic) {
             stock.removeItem(is);
-        }
         
         if (is.getAmount() > 0) {
             return false;
@@ -129,9 +132,7 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
     }
     
     public boolean addItem(ItemStack is) {
-        if (!isStatic) {
             stock.addItem(is);
-        }
         
         if (is.getAmount() > 0) {
             return false;
@@ -139,12 +140,8 @@ public class StockRoomTrait extends Trait implements InventoryHolder, StockRoomI
         
         return true;
     }
-    
-    public boolean isStatic() {
-        return isStatic;
-    }
-    
-    public void setStatic(boolean value) {
-        this.isStatic = value;
+
+    public boolean hasSpace(ItemStack is) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

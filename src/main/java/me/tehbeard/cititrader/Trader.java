@@ -508,8 +508,8 @@ public class Trader implements Listener {
                     return;
                 }
                 case SET_INFINITE: {
-                    if(npc.hasTrait(StockRoomTrait.class)) {
-                        StockRoomTrait trait = npc.getTrait(StockRoomTrait.class);
+                    if(npc.hasTrait(ShopTrait.class)) {
+                        ShopTrait trait = npc.getTrait(ShopTrait.class);
                         if (trait.isStatic()) {
                             Messaging.send(by, "Traders StockRoom will change with buy/sell");
                             trait.setStatic(false);
