@@ -10,15 +10,7 @@ commands:
   trader:
     aliases: ctrader
     description: CitiTrader commands 
-    usage: |
-      /<command> create name -type [TYPE] - Create a trader at the players current location
-      /<command> fire - fire an npc
-      /<command> setwallet [private|owner|bank|admin] accountname - set wallet type
-      /<command> wallet [give|take] amount  - place/remove money from a private wallet
-      /<command> sellprice price - Set selling price for item currently in hand, right click npc to set price for them.
-      /<command> buyprice price - Set buying price for item currently in hand, right click npc to set price for them.
-      /<command> cancel - Cancels all traders status with player
-      /<command> reloadprofiles - reload all profiles
+    usage: /<command> subcommand
 permissions:
   traders.command.*:
     description: Grants access to all trader commands
@@ -35,7 +27,13 @@ permissions:
       traders.command.linkchest: true
       traders.command.unlinkchest: true
       traders.command.link: true
-      traders.command.unlink: true
+      traders.command.removelink: true
+      traders.command.disable: true
+      traders.command.enable: true
+      traders.command.sellstack: true
+      traders.command.list: true
+      traders.command.setinv: true
+      traders.command.setinv.infinite: true
   traders.wallet.*:
     description: Grants access to all wallet commands
     default: op
@@ -66,10 +64,13 @@ permissions:
   traders.command.wallet:
     description: Give/take from an npc wallet.
     default: op
+  traders.command.fire:
+    description: Remove a trader from the game.
+    default: op
   traders.command.link:
     description: Link two NPCs price lists
     default: op
-  traders.command.unlink:
+  traders.command.removelink:
     description: Unlink to NPCs price lists
     default: op
   traders.command.linkchest:
@@ -78,6 +79,24 @@ permissions:
   traders.command.unlinkchest:
     description: Unlink a chest from an NPC
     default: true
+  traders.command.disable:
+    description: Close a Shop to the public.
+    default: true
+  traders.command.enable:
+    description: Open a Shop to the Public.
+    default: true
+  traders.command.sellstack:
+    description: Sell a stack, instead of one at a time.
+    default: op
+  traders.command.list:
+    description: List the Buy/Sell prices of an NPC.
+    default: true
+  traders.command.setinv:
+    description: Sets various options on an NPC inventory.
+    default: op
+  traders.command.seting.infinite:
+    description: Sets the inventory as Infinte.
+    default: op
   traders.wallet.private:
     description: Allows user to set traders to use their own private wallet.
     default: true

@@ -57,11 +57,10 @@ public class TraderCommands {
 
     @Command(aliases = {"trader"},
     desc = "Creates a Cititrader NPC.",
-    usage = "create [name] --type (type) --trait ('trait1, trait2...')",
-    flags = "bu",
+    usage = "create [name] --type (type) --wallet (validwallettype)",
     modifiers = {"create"},
     min = 2,
-    permission = "trader.create")
+    permission = "traders.command.create")
     public void create(CommandContext args, CommandSender sender, NPC npc) {
         String name = StringHelper.parseColors(args.getJoinedStrings(1));
         if (name.length() > 16) {
@@ -144,7 +143,7 @@ public class TraderCommands {
     flags = "r",
     modifiers = {"sellprice"},
     min = 1,
-    permission = "trader.commands.sellprice")
+    permission = "traders.command.sellprice")
     public void sellPrice(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus state = Trader.getStatus(((Player) sender).getName());
         if (state.getStatus().equals(TraderStatus.Status.SET_PRICE_BUY)) {
@@ -175,7 +174,7 @@ public class TraderCommands {
     flags = "r",
     modifiers = {"buyprice"},
     min = 1,
-    permission = "trader.commands.buyprice")
+    permission = "traders.command.buyprice")
     public void buyPrice(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus state = Trader.getStatus(((Player) sender).getName());
         if (state.getStatus().equals(TraderStatus.Status.SET_PRICE_SELL)) {
@@ -200,7 +199,7 @@ public class TraderCommands {
     usage = "setwallet [owner|bank|town_bank|private] (--bank (name))",
     modifiers = {"setwallet"},
     min = 2,
-    permission = "trader.commands.setwallet")
+    permission = "traders.command.setwallet")
     public void setWallet(CommandContext args, CommandSender sender, NPC npc) {
         String walltype = args.getString(1);
         if (args == null) {
@@ -250,10 +249,10 @@ public class TraderCommands {
 
     @Command(aliases = {"trader"},
     desc = "Various wallet functions.",
-    usage = "wallet [balance|give|take]",
+    usage = "wallet [balance|give|take] amount",
     modifiers = {"wallet"},
     min = 2,
-    permission = "trader.commands.wallet")
+    permission = "traders.command.wallet")
     public void doWallet(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus status = Trader.getStatus(sender.getName());
 
@@ -288,7 +287,7 @@ public class TraderCommands {
     usage = "fire",
     modifiers = {"fire"},
     min = 1,
-    permission = "trader.commands.fire")
+    permission = "traders.command.fire")
     public void doFire(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus status = Trader.getStatus(sender.getName());
         status.setStatus(TraderStatus.Status.FIRING);
@@ -300,7 +299,7 @@ public class TraderCommands {
     usage = "cancel",
     modifiers = {"cancel"},
     min = 1,
-    permission = "trader.commands.cancel")
+    permission = "traders.command.cancel")
     public void doCancel(CommandContext args, CommandSender sender, NPC npc) {
         Trader.clearStatus(sender.getName());
         sender.sendMessage(ChatColor.GREEN + "Status reset.");
@@ -321,7 +320,7 @@ public class TraderCommands {
     usage = "reloadprofiles",
     modifiers = {"reloadprofiles"},
     min = 1,
-    permission = "trader.commands.reloadprofiles")
+    permission = "traders.command.reloadprofiles")
     public void doReloadProfiles(CommandContext args, CommandSender sender, NPC npc) {
         plugin.reloadProfiles();
     }
@@ -331,7 +330,7 @@ public class TraderCommands {
     usage = "disable",
     modifiers = {"disable"},
     min = 1,
-    permission = "trader.commands.disable")
+    permission = "traders.command.disable")
     public void doDisable(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus status = Trader.getStatus(sender.getName());
         sender.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you want to disable.");
@@ -343,7 +342,7 @@ public class TraderCommands {
     usage = "enable",
     modifiers = {"enable"},
     min = 1,
-    permission = "trader.commands.enable")
+    permission = "traders.command.enable")
     public void doEnable(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus status = Trader.getStatus(sender.getName());
         sender.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you want to enable.");
@@ -352,10 +351,10 @@ public class TraderCommands {
 
     @Command(aliases = {"trader"},
     desc = "Links two NPCs to share one pricelist.",
-    usage = "link",
+    usage = "link [name]",
     modifiers = {"link"},
-    min = 1,
-    permission = "trader.commands.link")
+    min = 2,
+    permission = "traders.command.link")
     public void doLink(CommandContext args, CommandSender sender, NPC npc) {
         if (!(args.argsLength() > 1)) {
 
@@ -375,7 +374,7 @@ public class TraderCommands {
     usage = "removelink",
     modifiers = {"removelink"},
     min = 1,
-    permission = "trader.commands.removelink")
+    permission = "traders.command.removelink")
     public void removeLink(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus status = Trader.getStatus(sender.getName());
         sender.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader you want to remove the link from.");
@@ -387,7 +386,7 @@ public class TraderCommands {
     usage = "linkchest",
     modifiers = {"linkchest"},
     min = 1,
-    permission = "trader.commands.linkchest")
+    permission = "traders.command.linkchest")
     public void linkChest(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus status = Trader.getStatus(sender.getName());
         sender.sendMessage(ChatColor.DARK_PURPLE + "Right click the Chest you want to link.");
@@ -399,7 +398,7 @@ public class TraderCommands {
     usage = "unlinkchest",
     modifiers = {"unlinkchest"},
     min = 1,
-    permission = "trader.commands.unlinkchest")
+    permission = "traders.command.unlinkchest")
     public void unlinkChest(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus status = Trader.getStatus(sender.getName());
         sender.sendMessage(ChatColor.DARK_PURPLE + "Right click the Chest you want to unlink.");
@@ -408,11 +407,11 @@ public class TraderCommands {
 
     @Command(aliases = {"trader"},
     desc = "Set the size of the stack to sell.",
-    usage = "sellstack",
+    usage = "sellstack [size]",
     modifiers = {"sellstack"},
     min = 2,
     max = 2,
-    permission = "trader.commands.sellstack")
+    permission = "traders.command.sellstack")
     public void sellStack(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus status = Trader.getStatus(sender.getName());
         sender.sendMessage(ChatColor.DARK_PURPLE + "Right click the Trader with the item you want to set.");
@@ -426,7 +425,7 @@ public class TraderCommands {
     modifiers = {"list"},
     min = 2,
     max = 2,
-    permission = "trader.commands.list")
+    permission = "traders.command.list")
     public void doList(CommandContext args, CommandSender sender, NPC npc) {
         if (!args.getString(1).equalsIgnoreCase("buy") && !args.getString(1).equalsIgnoreCase("sell")) {
             sender.sendMessage(ChatColor.RED + "Command syntax is /trader list <buy|sell>");
@@ -450,7 +449,7 @@ public class TraderCommands {
     flags = "is",
     min = 2,
     max = 3,
-    permission = "trader.commands.setinv")
+    permission = "traders.command.setinv")
     public void doSetInv(CommandContext args, CommandSender sender, NPC npc) {
         TraderStatus status = Trader.getStatus(sender.getName());
         if (args.hasFlag('i')) {
