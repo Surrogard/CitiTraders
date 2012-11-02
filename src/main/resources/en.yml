@@ -41,6 +41,9 @@ chest:
   cantunlink: Chest could not be unlinked from Trader.
   unlinked: Chest has been unlinked from %s
   haslinkedstock: Trader has linked chests, use them to stock trader.
+  notlinknpc: This trader doesn't have link chest trait.
+  stocknotempty: Can't add LinkedChests if Stockroom isn't empty.
+  linkchesttraitadded: Trader now uses Chests for Inventory, stockroom has been removed.
 stack:
   error: Something went wrong.
   stackset: Stack amount set.

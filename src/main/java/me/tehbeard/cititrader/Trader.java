@@ -406,11 +406,7 @@ public class Trader implements Listener {
                     state.setStatus(Status.NOT);
                     return;
                 }
-                case SELECT_CHEST_NPC: {
-                    if (!isShop(state.getTrader())) {
-                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
-                        return;
-                    }
+                case SELECT_CHEST_NPC: {                    
                     NPC chestOwner = CitiTrader.self.isChestLinked(state.getChestLocation());
                     if (chestOwner != null) {
                         if (!chestOwner.getTrait(Owner.class).isOwnedBy(by)) {
@@ -432,15 +428,26 @@ public class Trader implements Listener {
                         return;
                     }
 
+                    // If Trader doesn't have LinkedChestTrait then attempt to convert him
+                    if (!npc.hasTrait(LinkedChestTrait.class)) {
+                        if (npc.hasTrait(StockRoomTrait.class)) {
+                            if (!npc.getTrait(StockRoomTrait.class).isStockRoomEmpty()) {
+                                Messaging.sendError(by, CitiTrader.self.getLang().getString("chest.stocknotempty"));
+                                state.setStatus(Status.NOT);
+                                return;
+                            }
+                            npc.removeTrait(StockRoomTrait.class);
+                        }
+                        
+                        npc.addTrait(LinkedChestTrait.class);
+                        Messaging.send(by, CitiTrader.self.getLang().getString("chest.linkchesttraitadded"));
+                    }
+                    
                     by.sendMessage(ChatColor.GREEN + String.format(CitiTrader.self.getLang().getString("chest.linked"), npc.getName()));
                     state.setStatus(Status.NOT);
                     return;
                 }
                 case SELECT_UNCHEST_NPC: {
-                    if (!isShop(state.getTrader())) {
-                        by.sendMessage(ChatColor.RED + CitiTrader.self.getLang().getString("shop.notashop"));
-                        return;
-                    }
                     NPC chestOwner = CitiTrader.self.isChestLinked(state.getChestLocation());
                     if (chestOwner != null) {
                         if (!chestOwner.getTrait(Owner.class).isOwnedBy(by)) {
