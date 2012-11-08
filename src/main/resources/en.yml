@@ -27,7 +27,7 @@ wallet:
   canttakewallet: Cannot take the money from the trader's wallet.
   given: Money given.
   taken: Money taken.
-  balance: Traders balance is %d
+  balance: Traders balance is %f
 link:
   cantlink: Trader could not be linked to %s
   linked: Trader linked to %s

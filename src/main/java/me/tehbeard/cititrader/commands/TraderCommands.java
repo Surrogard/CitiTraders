@@ -467,4 +467,14 @@ public class TraderCommands {
             
         }
     }
+    
+    @Command(aliases = {"trader"},
+    desc = "Reset the Language file.",
+    usage = "resetlang [--lang (langtype)] [Currently only supports en]",
+    modifiers = {"resetlang"},
+    permission = "traders.command.resetlang")
+    public void doResetLang(CommandContext args, CommandSender sender, NPC npc) {
+        CitiTrader.self.resetLanguage();
+        Messaging.send(sender, "Lanuage file reset.");
+    }
 }

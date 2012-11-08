@@ -328,6 +328,12 @@ public class CitiTrader extends JavaPlugin {
         }
         this.saveLanguage();
     }
+    
+    public void resetLanguage() {
+        InputStream defConfigStream = this.getResource("en.yml");
+        languages = YamlConfiguration.loadConfiguration(defConfigStream);
+        this.saveLanguage();
+    }
 
     public FileConfiguration getLang() {
         if (languages == null) {
@@ -341,7 +347,7 @@ public class CitiTrader extends JavaPlugin {
             return;
         }
         try {
-            getProfiles().save(languageFile);
+            languages.save(languageFile);
         } catch (IOException ex) {
             this.getLogger().log(Level.SEVERE, "Could not save config to " + languageFile, ex);
         }
