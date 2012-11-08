@@ -8,10 +8,12 @@
     <description>Trader for citizens</description>
 
     <properties>
+        
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bukkit.version>1.4.2-R0.2</bukkit.version>
         <citizensapi.version>2.0.4-SNAPSHOT</citizensapi.version>
         <vault.version>1.2.20-SNAPSHOT</vault.version>
+        
     </properties>
 
     <repositories>
