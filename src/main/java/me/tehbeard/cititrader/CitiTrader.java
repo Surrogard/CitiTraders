@@ -2,6 +2,7 @@ package me.tehbeard.cititrader;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -123,14 +124,14 @@ public class CitiTrader extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command cmd, String cmdName, String[] args) {
         try {
             // must put command into split.
-            String[] split = new String[args.length + 1];
-            System.arraycopy(args, 0, split, 1, args.length);
-            split[0] = cmd.getName().toLowerCase();
+            //String[] split = new String[args.length + 1];
+            //System.arraycopy(args, 0, split, 1, args.length);
+            //split[0] = cmd.getName().toLowerCase();
 
             String modifier = args.length > 0 ? args[0] : "";
 
-            if (!citicommands.hasCommand(split[0], modifier) && !modifier.isEmpty()) {
-                return suggestClosestModifier(sender, split[0], modifier);
+            if (!citicommands.hasCommand(cmd, modifier) && !modifier.isEmpty()) {
+                return suggestClosestModifier(sender, cmd.getName(), modifier);
                 //return true;
             }
 
@@ -139,7 +140,7 @@ public class CitiTrader extends JavaPlugin {
             // flexibility (ie. adding more context in the future without
             // changing everything)
             try {
-                citicommands.execute(split, sender, sender, npc);
+                citicommands.execute(cmd, args, sender, sender, npc);
             } catch (ServerCommandException ex) {
                 Messaging.sendTr(sender, Messages.COMMAND_MUST_BE_INGAME);
             } catch (CommandUsageException ex) {
@@ -165,15 +166,7 @@ public class CitiTrader extends JavaPlugin {
     }
     
     private boolean suggestClosestModifier(CommandSender sender, String command, String modifier) {
-        int minDist = Integer.MAX_VALUE;
-        String closest = "";
-        for (String string : citicommands.getAllCommandModifiers(command)) {
-            int distance = StringHelper.getLevenshteinDistance(modifier, string);
-            if (minDist > distance) {
-                minDist = distance;
-                closest = string;
-            }
-        }
+        String closest = citicommands.getClosestCommandModifier(command, modifier);
         if (!closest.isEmpty()) {
             sender.sendMessage(ChatColor.GRAY + Messaging.tr(Messages.UNKNOWN_COMMAND));
             sender.sendMessage(StringHelper.wrap(" /") + command + " " + StringHelper.wrap(closest));
@@ -356,18 +349,22 @@ public class CitiTrader extends JavaPlugin {
     public void checkVersion() {
         InputStream is = null;
         String returnString = "";
+		String urlString = "http://thedemgel.com/files/public-docs/CitiTraders/version.txt";
         try {
-            URL url = new URL("http://thedemgel.com/files/public-docs/CitiTraders/version.txt");
+            URL url = new URL(urlString);
             is = url.openStream();
             Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A");
             if (scanner.hasNext()) {
                 returnString = scanner.next();
             }
-        } catch (IOException ex) {
-            Logger.getLogger(CitiTrader.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
+        } catch (FileNotFoundException fnfex) {
+			Logger.getLogger(CitiTrader.class.getName()).log(Level.WARNING, "Couldn't read version file: " + urlString);
+		} catch (IOException ex) {
+            Logger.getLogger(CitiTrader.class.getName()).log(Level.WARNING, null, ex);
+		} finally {
             try {
-                is.close();
+                if(is != null)
+					is.close();
             } catch (IOException ex) {
                 Logger.getLogger(CitiTrader.class.getName()).log(Level.SEVERE, null, ex);
             }
