@@ -348,6 +348,7 @@ public class CitiTrader extends JavaPlugin {
 
     public void checkVersion() {
         InputStream is = null;
+	boolean fileNotFound = false;
         String returnString = "";
 		String urlString = "http://thedemgel.com/files/public-docs/CitiTraders/version.txt";
         try {
@@ -358,19 +359,20 @@ public class CitiTrader extends JavaPlugin {
                 returnString = scanner.next();
             }
         } catch (FileNotFoundException fnfex) {
-			Logger.getLogger(CitiTrader.class.getName()).log(Level.WARNING, "Couldn't read version file: " + urlString);
-		} catch (IOException ex) {
-            Logger.getLogger(CitiTrader.class.getName()).log(Level.WARNING, null, ex);
-		} finally {
+		Logger.getLogger(CitiTrader.class.getName()).log(Level.WARNING, "Couldn't read version file: " + urlString);
+		fileNotFound = true;
+	} catch (IOException ex) {
+        	Logger.getLogger(CitiTrader.class.getName()).log(Level.WARNING, null, ex);
+	} finally {
             try {
                 if(is != null)
-					is.close();
+			is.close();
             } catch (IOException ex) {
                 Logger.getLogger(CitiTrader.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         returnString = returnString.trim();
-        if (!returnString.equals(this.getDescription().getVersion())) {
+        if (! fileNotFound && !returnString.equals(this.getDescription().getVersion())) {
             String warning = String.format("%-9s %-12s %23s", "|", this.getDescription().getVersion(), "|");
             String newversion = String.format("%-9s %-12s %23s", "|", returnString, "|");
             getLogger().warning("*--------------------------------------------*");
