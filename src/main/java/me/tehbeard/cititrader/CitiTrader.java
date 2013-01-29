@@ -350,7 +350,7 @@ public class CitiTrader extends JavaPlugin {
         InputStream is = null;
 	boolean fileNotFound = false;
         String returnString = "";
-		String urlString = "http://thedemgel.com/files/public-docs/CitiTraders/version.txt";
+		String urlString = "https://raw.github.com/Surrogard/CitiTraders/master/version.txt";
         try {
             URL url = new URL(urlString);
             is = url.openStream();
